@@ -1,9 +1,8 @@
 #!/usr/bin/env ruby
 require 'colorize'
 
-def disp_instruction() abort "you need argument." end
-
-terms = ARGV.map{|arg| arg.downcase} || disp_instruction
+def disp_instruction() abort "\nyou need argument.\n".red end
+terms =  ARGV.size > 0 ? ARGV.map{ |arg| arg.downcase } : disp_instruction
 grep_mode = ARGV.include?("-g")
 terms.delete("-g")
 
