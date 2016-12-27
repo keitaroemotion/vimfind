@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+cp vf /usr/local/bin
+vf "$@"

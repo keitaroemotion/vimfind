@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+def disp_instruction() abort "you need argument." end
+
+term = ARGV[0] || disp_instruction
+
+Dir.glob("**/*").select{|file| file.include?(term) }.each do |f|
+  print "#{f} ? [y/n/q]"
+  input = $stdin.gets.chomp.downcase
+  system "vim #{f}" if input == "y"
+  abort if input == "q"
+end
+
