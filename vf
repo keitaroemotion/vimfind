@@ -7,15 +7,17 @@ terms = ARGV.map{|arg| arg.downcase} || disp_instruction
 grep_mode = ARGV.include?("-g")
 terms.delete("-g")
 
-def is_term_in_file(file, terms, grep_mode)
+def is_term_in_file(file, terms)
   text =  File.open(file, "r").read.downcase rescue ""
-  !grep_mode || terms.select{|term| text.include?(term)}.size == terms.size
+  terms.select{|term| text.include?(term)}.size > 0
 end
 
 def includes(file, terms, grep_mode)
-  ((File.file?(file)) &&
-  (is_term_in_file(file, terms, grep_mode))) || 
-  (terms.select{|term| file.downcase.include?(term) }.size == terms.size) 
+  if grep_mode
+    File.file?(file) && is_term_in_file(file, terms)
+  else  
+    (terms.select{|term| file.downcase.include?(term) }.size == terms.size) 
+  end
 end
 
 def replace(text, terms)
