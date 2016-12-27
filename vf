@@ -1,19 +1,29 @@
 #!/usr/bin/env ruby
+require 'colorize'
 
 def disp_instruction() abort "you need argument." end
 
-terms = ARGV || disp_instruction
+terms = ARGV.map{|arg| arg.downcase} || disp_instruction
+grep_mode = ARGV.include?("-g")
+terms.delete("-g")
 
-def includes(text, terms)
-  terms.select{|term| text.include?(term) }.size == terms.size
+def is_term_in_file(file, terms, grep_mode)
+  text =  File.open(file, "r").read.downcase rescue ""
+  !grep_mode || terms.select{|term| text.include?(term)}.size == terms.size
+end
+
+def includes(file, terms, grep_mode)
+  ((File.file?(file)) &&
+  (is_term_in_file(file, terms, grep_mode))) || 
+  (terms.select{|term| file.downcase.include?(term) }.size == terms.size) 
 end
 
 def replace(text, terms)
-  terms.each { |term| text = text.gsub(term, "[#{term}]") }
+  terms.each { |term| text = text.gsub(term, "#{term.green}") }
   text
 end
 
-Dir.glob("**/*").select{|file| includes(file, terms) }.each do |f|
+Dir.glob("**/*").select{|file| includes(file, terms, grep_mode) }.each do |f|
   print "#{replace(f, terms)} ? [y/n/q]"
   input = $stdin.gets.chomp.downcase
   system "vim #{f}" if input == "y"
