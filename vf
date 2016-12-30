@@ -3,9 +3,13 @@ require 'colorize'
 
 def disp_instruction() abort "\nyou need argument.\n".red end
 
+def add_test(arr)
+  arr + arr.map {|a| "test/#{a}"}
+end
+
 terms =  ARGV.size > 0 ? ARGV : disp_instruction
 grep_mode = ARGV.include?("-g")
-mvc_mode = ARGV.include?("-mvc") ? ["controllers","models","views", "backends"] : []
+mvc_mode = ARGV.include?("-mvc") ? add_test(["controllers","models","views", "backends"]) : []
 
 def get_directory()
   ARGV.select {|arg| File.directory?(arg) }
