@@ -1,5 +1,5 @@
 ==============================
-`vimfind`
+vimfind
 ==============================
 
 This is a script to enable you to easily edit your files in a directory without going into the nest subdirectories.
@@ -28,14 +28,20 @@ the following command allows you to grep and edit matching files:
 $ vf -g [keyword]
 `
 
+================
+For Rails Users
+================
+
 If you are ruby user, you can find/grep through the [model/view/controller]
 
 List Files:
+
 `
 $ vf -mvc [@name] 
 `
 
 List Files Contains the keyword
+
 `
 $ vf -mvc [@name] w:[keyword]
 `
