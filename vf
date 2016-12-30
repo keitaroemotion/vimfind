@@ -2,12 +2,20 @@
 require 'colorize'
 
 def disp_instruction() abort "\nyou need argument.\n".red end
-terms =  ARGV.size > 0 ? ARGV.map{ |arg| arg.downcase } : disp_instruction
-grep_mode = ARGV.include?("-g")
-terms.delete("-g")
 
-def file_open()
-  File.open(file, "r").read.downcase rescue ""
+terms =  ARGV.size > 0 ? ARGV : disp_instruction
+grep_mode = ARGV.include?("-g")
+mvc_mode = ARGV.include?("-mvc") ? ["controllers","models","views"] : []
+
+def get_directory()
+  ARGV.select {|arg| File.directory?(arg) }
+end
+
+directory = "#{get_directory[0]}**/*" 
+terms = terms.select {|term| !["-g", directory, "-mvc"].include?(term) }.map{ |arg| arg.downcase }
+
+def file_open(file, mode)
+  File.open(file, mode).read.downcase rescue ""
 end
 
 def is_term_in_file(file, terms)
@@ -16,6 +24,7 @@ def is_term_in_file(file, terms)
 end
 
 def includes(file, terms, grep_mode)
+  terms = terms.select {|x| !x.start_with?("w:")}
   if grep_mode
     File.file?(file) && is_term_in_file(file, terms)
   else  
@@ -28,10 +37,33 @@ def replace(text, terms)
   text
 end
 
-Dir.glob("**/*").select{|file| includes(file, terms, grep_mode) }.each do |f|
-  print "#{replace(f, terms)} ? [y/n/q]"
-  input = $stdin.gets.chomp.downcase
-  system "vim #{f}" if input == "y"
-  abort if input == "q"
+def has(mvc, file, terms)
+  if mvc
+    name = terms.select{|x| !x.include?("/") && !x.include?("w:") }[0]
+    mvc.map{|x| Regexp.new("#{x}/#{name}*") }.select{|x| x.match(file) }.size > 0
+  else
+    true
+  end
 end
+
+def list_files(dir, terms, grep_mode, mvc)
+  Dir.glob(dir).select{|file| includes(file, terms, grep_mode) }
+    .select{ |file| has(mvc, file, terms) }
+end
+
+def search_all(terms, grep_mode, dir, mvc, mvc_keyword)
+  list_files(dir, terms, grep_mode, mvc).each do |f|
+    if (!mvc_keyword || file_open(f, "r").include?(mvc_keyword))
+      print "#{replace(f, terms)} ? [y/n/q]"
+      input = $stdin.gets.chomp.downcase
+      system "vim #{f}" if input == "y"
+      abort if input == "q"
+    end
+  end
+end
+
+mvc_keyword = terms.select{|x| x.include?("w:") }[0] 
+mvc_keyword = mvc_keyword.gsub("w:","") if mvc_keyword 
+
+search_all(terms, grep_mode, directory, mvc_mode, mvc_keyword) 
 
