@@ -48,11 +48,15 @@ end
 
 def list_files(dir, terms, grep_mode, mvc)
   Dir.glob(dir).select{|file| includes(file, terms, grep_mode) }
-    .select{ |file| has(mvc, file, terms, grep_mode) }
+    .select{ |file| has(mvc, file, terms, grep_mode) } 
+end
+
+def add_config_files(files)
+  files.push "#{Dir.pwd}/db/schema.rb"
 end
 
 def search_all(terms, grep_mode, dir, mvc, mvc_keyword)
-  list_files(dir, terms, grep_mode, mvc).each do |f|
+  add_config_files(list_files(dir, terms, grep_mode, mvc)).each do |f|
     if (!mvc_keyword || file_open(f, "r").include?(mvc_keyword))
       print "#{replace(f, terms)} ? [y/n/q]"
       input = $stdin.gets.chomp.downcase
