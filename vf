@@ -20,7 +20,7 @@ end
 
 def is_term_in_file(file, terms)
   text = file_open(file, "r") 
-  terms.select{|term| text.include?(term)}.size > 0
+  terms.select{|term| text.include?(term)}.size == terms.size
 end
 
 def includes(file, terms, grep_mode)
@@ -37,8 +37,8 @@ def replace(text, terms)
   text
 end
 
-def has(mvc, file, terms)
-  if mvc
+def has(mvc, file, terms, grep_mode)
+  if !grep_mode && mvc.size > 0
     name = terms.select{|x| !x.include?("/") && !x.include?("w:") }[0]
     mvc.map{|x| Regexp.new("#{x}/#{name}*") }.select{|x| x.match(file) }.size > 0
   else
@@ -48,7 +48,7 @@ end
 
 def list_files(dir, terms, grep_mode, mvc)
   Dir.glob(dir).select{|file| includes(file, terms, grep_mode) }
-    .select{ |file| has(mvc, file, terms) }
+    .select{ |file| has(mvc, file, terms, grep_mode) }
 end
 
 def search_all(terms, grep_mode, dir, mvc, mvc_keyword)
