@@ -6,8 +6,12 @@ terms =  ARGV.size > 0 ? ARGV.map{ |arg| arg.downcase } : disp_instruction
 grep_mode = ARGV.include?("-g")
 terms.delete("-g")
 
+def file_open()
+  File.open(file, "r").read.downcase rescue ""
+end
+
 def is_term_in_file(file, terms)
-  text =  File.open(file, "r").read.downcase rescue ""
+  text = file_open(file, "r") 
   terms.select{|term| text.include?(term)}.size > 0
 end
 
