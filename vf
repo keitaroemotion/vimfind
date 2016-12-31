@@ -81,17 +81,29 @@ def display_matches(f, terms)
   end
 end
 
-def search_all(terms, dir, mvc, mvc_keyword)
-  key_terms = get_words(terms)
-  add_config_files(list_files(dir, terms, mvc)).each do |f|
+def sort(files, i, new_files=[])
+  files = files.flatten 
+  [i-1..files.size-1].each {|x| new_files.push(files[x])}
+  [0..i-2].each {|x| new_files.push(files[x])}
+  new_files.flatten
+end
+
+def execute_files(files, mvc_keyword, terms, i=0)
+  files.each_with_index do |f, index|
     if (!mvc_keyword || file_open(f, "r").include?(mvc_keyword))
-      print "#{replace(f, terms)} ? [y/q/w]"
+      print "#{replace(f, terms)} ? [y/q/w/p]"
       input = $stdin.gets.chomp.downcase
       system "vim #{f}"             if input == "y"
       display_matches(f, key_terms) if input == "w"
+      execute_files(sort(files, index), mvc_keyword, terms) if input == "p"
       abort                         if input == "q"
     end
   end
+end
+
+def search_all(terms, dir, mvc, mvc_keyword)
+  key_terms = get_words(terms)
+  execute_files list_files(dir, terms, mvc), mvc_keyword, terms
 end
 
 mvc_keyword = terms.select{|x| x.include?(GREP) }[0] 
