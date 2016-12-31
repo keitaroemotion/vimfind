@@ -88,13 +88,43 @@ def sort(files, i, new_files=[])
   new_files.flatten
 end
 
+
+LIST = %w(def concerning belongs_to has_one has_many)
+
+def paint(t, f)
+  puts t.cyan if t.start_with?(LIST[0])
+  puts t.blue if t.start_with?(LIST[1])
+  (2..4).each do |i|
+    puts File.basename(f).gsub(".rb"," ").magenta + t.magenta if t.start_with?(LIST[i])
+  end
+end
+
+def collect_funcs(f, result=[])
+  lines = File.open(f, "r").each_line.to_a if File.file?(f)
+  result.push cf_subroutine(lines) if lines
+  result.flatten.each_slice(5).each_with_index do |lines, i|
+    lines.each do |line|
+      paint(line.strip, f)
+    end
+    (print ""; $stdin.gets.chomp == "q" ? abort : "") if i > 0
+  end
+end
+
+def cf_subroutine(lines, new_lines=[])
+  lines.each do |line|
+    LIST.each {|x| new_lines.push(line) if line.strip.start_with?(x) }
+  end
+  new_lines.select {|x| x }
+end
+
 def execute_files(files, mvc_keyword, terms, i=0)
   files.each_with_index do |f, index|
     if (!mvc_keyword || file_open(f, "r").include?(mvc_keyword))
-      print "#{replace(f, terms)} ? [y/q/w/p]"
+      print "#{replace(f, terms)} ? [y/q/w/p/l]"
       input = $stdin.gets.chomp.downcase
       system "vim #{f}"             if input == "y"
       display_matches(f, key_terms) if input == "w"
+      collect_funcs(f)              if input == "l"
       execute_files(sort(files, index), mvc_keyword, terms) if input == "p"
       abort                         if input == "q"
     end
