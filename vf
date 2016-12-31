@@ -89,7 +89,7 @@ def sort(files, i, new_files=[])
 end
 
 
-LIST = %w(def concerning belongs_to has_one has_many)
+LIST = %w(def concerning belongs_to has_one has_many test)
 
 def paint(t, f)
   puts t.cyan if t.start_with?(LIST[0])
@@ -97,6 +97,15 @@ def paint(t, f)
   (2..4).each do |i|
     puts File.basename(f).gsub(".rb"," ").magenta + t.magenta if t.start_with?(LIST[i])
   end
+  puts t.green if t.start_with?(LIST[5])
+end
+
+def tmpsearch(f, term, res=[], key="def")
+  File.open(f, "r").each do |line|
+    return res.map{|x| x.chomp} if (res.size > 0 && line.include?("def "))
+    res.push(line) if (line.include?("#{key} "+term) || res.size > 0)
+  end
+  return res.map{|x| x.chomp }
 end
 
 def collect_funcs(f, result=[])
@@ -106,7 +115,19 @@ def collect_funcs(f, result=[])
     lines.each do |line|
       paint(line.strip, f)
     end
-    (print ""; $stdin.gets.chomp == "q" ? abort : "") if i > 0
+    if i > 0
+      print "[q:quit text:code bloc search None:Go next] "
+      command = $stdin.gets.chomp.strip
+      case command
+      when "q"
+        abort
+      when ""
+      else
+        tmpsearch(f, command).each do |line|
+          puts line.yellow
+        end
+      end 
+    end  
   end
 end
 
