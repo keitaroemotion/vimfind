@@ -184,7 +184,7 @@ def execute_files(files, mvc_keyword, terms, dir, i=0)
       print "#{replace(f, terms)} ? [y/q/w/p/l/db]"
       input = $stdin.gets.chomp.downcase
       check_db(dir)                 if input == "db"
-      system "vim #{f}"             if input == "y"
+      system "vim #{f}"             if (input == "y" || input == "v")
       display_matches(f, key_terms) if input == "w"
       collect_funcs(f)              if input == "l"
       execute_files(sort(files, index), mvc_keyword, terms, dir) if input == "p"
