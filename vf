@@ -71,10 +71,6 @@ def list_files(dir, terms, mvc)
     .select{ |file| has(mvc, file, terms) } 
 end
 
-def add_config_files(files)
-  files.push "#{Dir.pwd}/db/schema.rb"
-end
-
 def display_matches(f, terms)
   File.open(f, "r").each_with_index do |item, index|
     print replace("#{item}", terms) if  has_words(terms, item) 
@@ -87,7 +83,6 @@ def sort(files, i, new_files=[])
   [0..i-2].each {|x| new_files.push(files[x])}
   new_files.flatten
 end
-
 
 LIST = %w(def concerning belongs_to has_one has_many test)
 
@@ -113,6 +108,7 @@ end
 # the current selected file:
 # this allows you to show only functions and Concerns, test labels
 # without entering into the file.
+
 def collect_funcs(f, result=[])
   lines = File.open(f, "r").each_line.to_a if File.file?(f)
   result.push cf_subroutine(lines) if lines
@@ -143,23 +139,60 @@ def cf_subroutine(lines, new_lines=[])
   new_lines.select {|x| x }
 end
 
-def execute_files(files, mvc_keyword, terms, i=0)
+def get_table_name(res, key)
+  res[0].gsub(key, "").gsub("\"","").split(",")[0].strip
+end
+
+def parse_value(value)
+  value[1..value.size-1].map{|x| x.chomp.gsub("t.","")}
+end
+
+def get_command(msg)
+  print msg
+  $stdin.gets.chomp
+end
+
+def check_db(dir, key="create_table ", res=[], hash={})
+  File.open(list_files(dir, %w(db schema.rb), [])[0], "r").each do |line|
+    if (res.size > 0 && line.include?("end"))
+      hash[get_table_name(res, key)] = parse_value(res)
+      res = []
+    end  
+    res.push(line) if (line.include?(key) || res.size > 0)
+  end
+  command = get_command "[Enter:]"
+  case command
+  when ""
+    hash.keys.each {|k| puts k.red }
+  else
+    keys = hash.keys.include?(command) ? [command] : nil
+    keys = hash.keys.select{|k| k.include?(command)} if !keys
+    keys.each do |key|
+      puts "|#{key}|".cyan
+      hash[key].tap {|v| puts v}
+    end
+  end
+end
+
+
+def execute_files(files, mvc_keyword, terms, dir, i=0)
   key_terms = get_words(terms)
   files.each_with_index do |f, index|
     if (!mvc_keyword || file_open(f, "r").include?(mvc_keyword))
-      print "#{replace(f, terms)} ? [y/q/w/p/l]"
+      print "#{replace(f, terms)} ? [y/q/w/p/l/db]"
       input = $stdin.gets.chomp.downcase
+      check_db(dir)                 if input == "db"
       system "vim #{f}"             if input == "y"
       display_matches(f, key_terms) if input == "w"
       collect_funcs(f)              if input == "l"
-      execute_files(sort(files, index), mvc_keyword, terms) if input == "p"
+      execute_files(sort(files, index), mvc_keyword, terms, dir) if input == "p"
       abort                         if input == "q"
     end
   end
 end
 
 def search_all(terms, dir, mvc, mvc_keyword)
-  execute_files list_files(dir, terms, mvc), mvc_keyword, terms
+  execute_files list_files(dir, terms, mvc), mvc_keyword, terms, dir
 end
 
 mvc_keyword = terms.select{|x| x.include?(GREP) }[0] 
