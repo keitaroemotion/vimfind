@@ -46,4 +46,13 @@ List Files Contains the keyword
 $ vf -mvc [@name] w:[keyword]
 `
 
+You encounter with the following suggestion while searching:
+
+`
+app/models/sample.rb ? [y/q/w/p/l]
+`
+
+y ... Open the current file.
+q ... Quit Application
+w ... 
 

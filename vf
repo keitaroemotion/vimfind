@@ -144,6 +144,7 @@ def cf_subroutine(lines, new_lines=[])
 end
 
 def execute_files(files, mvc_keyword, terms, i=0)
+  key_terms = get_words(terms)
   files.each_with_index do |f, index|
     if (!mvc_keyword || file_open(f, "r").include?(mvc_keyword))
       print "#{replace(f, terms)} ? [y/q/w/p/l]"
@@ -158,7 +159,6 @@ def execute_files(files, mvc_keyword, terms, i=0)
 end
 
 def search_all(terms, dir, mvc, mvc_keyword)
-  key_terms = get_words(terms)
   execute_files list_files(dir, terms, mvc), mvc_keyword, terms
 end
 
