@@ -108,6 +108,11 @@ def tmpsearch(f, term, res=[], key="def")
   return res.map{|x| x.chomp }
 end
 
+# this part is pretty dirty ( we need to clean this up later)
+# this function allows you to enlist function name only in
+# the current selected file:
+# this allows you to show only functions and Concerns, test labels
+# without entering into the file.
 def collect_funcs(f, result=[])
   lines = File.open(f, "r").each_line.to_a if File.file?(f)
   result.push cf_subroutine(lines) if lines
