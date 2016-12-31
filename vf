@@ -165,11 +165,13 @@ def check_db(dir, key="create_table ", res=[], hash={})
   when ""
     hash.keys.each {|k| puts k.red }
   else
-    keys = hash.keys.include?(command) ? [command] : nil
-    keys = hash.keys.select{|k| k.include?(command)} if !keys
+    keys   = hash.keys.include?(command) ? [command] : nil
+    keys   = hash.keys.select{|k| k.include?(command)} if !keys
+    keys  += hash.keys.select{|k| hash[k].select{|v| v.include?(command)}.size > 0 && !keys.include?(k) } 
     keys.each do |key|
       puts "|#{key}|".cyan
-      hash[key].tap {|v| puts v}
+      hash[key].tap {|v| puts v.map{|x| x.sub(command, command.cyan)}}
+      $stdin.gets.chomp 
     end
   end
 end
