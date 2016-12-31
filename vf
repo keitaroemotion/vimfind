@@ -22,9 +22,12 @@ def file_open(file, mode)
   File.open(file, mode).read.downcase rescue ""
 end
 
-def is_term_in_file(file, terms)
-  text = file_open(file, "r") 
+def has_words(terms, text)
   terms.select{|term| text.include?(term)}.size == terms.size
+end
+
+def is_term_in_file(file, terms)
+  has_words(terms, file_open(file, "r"))
 end
 
 def includes(file, terms, grep_mode)
@@ -59,12 +62,25 @@ def add_config_files(files)
   files.push "#{Dir.pwd}/db/schema.rb"
 end
 
+def get_words(terms)
+  terms.select{|term| term.start_with?("w:")}
+    .map{|term| term.gsub("w:","")}
+end
+
+def display_matches(f, terms)
+  File.open(f, "r").each_with_index do |item, index|
+    print "#{item}".yellow if  has_words(terms, item) 
+  end
+end
+
 def search_all(terms, grep_mode, dir, mvc, mvc_keyword)
+  key_terms = get_words(terms)
   add_config_files(list_files(dir, terms, grep_mode, mvc)).each do |f|
     if (!mvc_keyword || file_open(f, "r").include?(mvc_keyword))
-      print "#{replace(f, terms)} ? [y/n/q]"
+      print "#{replace(f, terms)} ? [y/q/w]"
       input = $stdin.gets.chomp.downcase
       system "vim #{f}" if input == "y"
+      display_matches(f, key_terms) if input == "w"
       abort if input == "q"
     end
   end
