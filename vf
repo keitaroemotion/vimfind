@@ -74,7 +74,7 @@ end
 def display_matches(f, terms)
   File.open(f, "r").each_with_index do |item, index|
     print replace("#{item}", terms) if  has_words(terms, item) 
-  end
+  end if File.file?(f)
 end
 
 def sort(files, i, new_files=[])
