@@ -52,9 +52,10 @@ You encounter with the following suggestion while searching:
 app/models/sample.rb ? [y/q/w/p/l]
 `
 
+`
 y ... Open the current file.
 q ... Quit Application
 w ... Show the lines matching your w:[keyword] query
 p ... Go to Previous Selection. 
 l ... List the Functions of the Current File.
-
+`
