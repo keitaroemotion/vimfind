@@ -25,7 +25,7 @@ $ vf [keyword]
 the following command allows you to grep and edit matching files:
 
 `
-$ vf -g [keyword]
+$ vf w:[keyword]
 `
 
 ================

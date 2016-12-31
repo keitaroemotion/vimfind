@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 require 'colorize'
 
+GREP = "w:"
+
 def disp_instruction() abort "\nyou need argument.\n".red end
 
 def add_test(arr)
@@ -8,7 +10,6 @@ def add_test(arr)
 end
 
 terms =  ARGV.size > 0 ? ARGV : disp_instruction
-grep_mode = ARGV.include?("-g")
 mvc_mode = ARGV.include?("-mvc") ? add_test(["controllers","models","views", "backends"]) : []
 
 def get_directory()
@@ -16,27 +17,39 @@ def get_directory()
 end
 
 directory = "#{get_directory[0]}**/*" 
-terms = terms.select {|term| !["-g", directory, "-mvc"].include?(term) }.map{ |arg| arg.downcase }
+terms = terms.select {|term| ![directory, "-mvc"].include?(term) }.map{ |arg| arg.downcase }
 
 def file_open(file, mode)
   File.open(file, mode).read.downcase rescue ""
 end
 
+def get_words(terms)
+  terms.select{|term| term.start_with?(GREP)}
+    .map{|term| term.gsub(GREP,"")}
+end
+
+def get_non_words(terms)
+  terms.select{|term| !term.start_with?(GREP)}
+end
+
 def has_words(terms, text)
-  terms.select{|term| text.include?(term)}.size == terms.size
+  (terms.select{|term| text.include?(term)}.size == terms.size) \
+    && (terms.size > 0)
 end
 
 def is_term_in_file(file, terms)
   has_words(terms, file_open(file, "r"))
 end
 
-def includes(file, terms, grep_mode)
-  terms = terms.select {|x| !x.start_with?("w:")}
-  if grep_mode
-    File.file?(file) && is_term_in_file(file, terms)
-  else  
-    (terms.select{|term| file.downcase.include?(term) }.size == terms.size) 
-  end
+def includes(file, terms, words_in_file_name=true, words_in_file_content=true)
+  non_terms = get_non_words(terms) 
+  terms     = get_words(terms)
+  words_in_file_content =
+    File.file?(file) && is_term_in_file(file, terms) if terms.size > 0
+  words_in_file_name = non_terms.select{ |term|
+                         file.downcase.include?(term)
+                       }.size == non_terms.size if non_terms.size > 0
+  words_in_file_name && words_in_file_content                      
 end
 
 def replace(text, terms)
@@ -44,50 +57,45 @@ def replace(text, terms)
   text
 end
 
-def has(mvc, file, terms, grep_mode)
-  if !grep_mode && mvc.size > 0
-    name = terms.select{|x| !x.include?("/") && !x.include?("w:") }[0]
+def has(mvc, file, terms)
+  if mvc.size > 0
+    name = terms.select{|x| !x.include?("/") && !x.include?(GREP) }[0]
     mvc.map{|x| Regexp.new("#{x}/#{name}*") }.select{|x| x.match(file) }.size > 0
   else
     true
   end
 end
 
-def list_files(dir, terms, grep_mode, mvc)
-  Dir.glob(dir).select{|file| includes(file, terms, grep_mode) }
-    .select{ |file| has(mvc, file, terms, grep_mode) } 
+def list_files(dir, terms, mvc)
+  Dir.glob(dir).select{|file| includes(file, terms) }
+    .select{ |file| has(mvc, file, terms) } 
 end
 
 def add_config_files(files)
   files.push "#{Dir.pwd}/db/schema.rb"
 end
 
-def get_words(terms)
-  terms.select{|term| term.start_with?("w:")}
-    .map{|term| term.gsub("w:","")}
-end
-
 def display_matches(f, terms)
   File.open(f, "r").each_with_index do |item, index|
-    print "#{item}".yellow if  has_words(terms, item) 
+    print replace("#{item}", terms) if  has_words(terms, item) 
   end
 end
 
-def search_all(terms, grep_mode, dir, mvc, mvc_keyword)
+def search_all(terms, dir, mvc, mvc_keyword)
   key_terms = get_words(terms)
-  add_config_files(list_files(dir, terms, grep_mode, mvc)).each do |f|
+  add_config_files(list_files(dir, terms, mvc)).each do |f|
     if (!mvc_keyword || file_open(f, "r").include?(mvc_keyword))
       print "#{replace(f, terms)} ? [y/q/w]"
       input = $stdin.gets.chomp.downcase
-      system "vim #{f}" if input == "y"
+      system "vim #{f}"             if input == "y"
       display_matches(f, key_terms) if input == "w"
-      abort if input == "q"
+      abort                         if input == "q"
     end
   end
 end
 
-mvc_keyword = terms.select{|x| x.include?("w:") }[0] 
-mvc_keyword = mvc_keyword.gsub("w:","") if mvc_keyword 
+mvc_keyword = terms.select{|x| x.include?(GREP) }[0] 
+mvc_keyword = mvc_keyword.gsub(GREP,"") if mvc_keyword 
 
-search_all(terms, grep_mode, directory, mvc_mode, mvc_keyword) 
+search_all(terms, directory, mvc_mode, mvc_keyword) 
 
