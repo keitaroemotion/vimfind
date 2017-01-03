@@ -176,6 +176,37 @@ def check_db(dir, key="create_table ", res=[], hash={})
   end
 end
 
+def ask(msg, a=false)
+  print "#{msg} "
+  input = $stdin.gets.chomp
+  abort if input == "q"
+  a ? input.split(" ") : input
+end
+
+def contains(a, b)
+  a.select{|x| x == b }.size > 0
+end
+
+def test(f, terms, term="")
+  commands = ask("[v:verbose u:unit_test s:successes e:errors q:quit]", true)
+  v = contains(commands, "v") ? "--verbose" : ""
+  if commands.include?("u")
+    lines = File.read(f).split("\n").select{ |line|
+      line = line.strip
+      line.include?("test ") && line.include?("do") && !line.start_with?("#")
+    }.map{ |test|
+      test.gsub("test","").gsub("\"","").gsub("do", "")
+    }
+
+    lines.each_with_index { |test, i|
+      puts "[#{i}] #{test}" 
+    }
+    term = "\"" + lines["/.*#{ask('[Enter term]')}.*".to_i].strip + "\""
+  end
+  command =  "ruby -I test #{f} #{term} #{v}" 
+  puts command
+  system command
+end
 
 def execute_files(files, mvc_keyword, terms, dir, i=0)
   key_terms = get_words(terms)
@@ -187,7 +218,7 @@ def execute_files(files, mvc_keyword, terms, dir, i=0)
       system "vim #{f}"             if (input == "y" || input == "v")
       display_matches(f, key_terms) if input == "w"
       collect_funcs(f)              if input == "l"
-      system "ruby -I test #{f} --verbose" if input == "t"
+      test(f, terms)                if input == "t"
       execute_files(sort(files, index), mvc_keyword, terms, dir) if input == "p"
       abort                         if input == "q"
     end
