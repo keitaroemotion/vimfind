@@ -201,7 +201,7 @@ def test(f, terms, term="")
     lines.each_with_index { |test, i|
       puts "[#{i}] #{test}" 
     }
-    term = "\"" + lines["/.*#{ask('[Enter term]')}.*".to_i].strip + "\""
+    term = "-n \"" + lines["/.*#{ask('[Enter term]')}.*".to_i].strip + "\""
   end
   command =  "ruby -I test #{f} #{term} #{v}" 
   puts command
