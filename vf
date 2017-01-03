@@ -187,7 +187,7 @@ def execute_files(files, mvc_keyword, terms, dir, i=0)
       system "vim #{f}"             if (input == "y" || input == "v")
       display_matches(f, key_terms) if input == "w"
       collect_funcs(f)              if input == "l"
-      system "ruby -I test #{f}"    if input == "t"
+      system "ruby -I test #{f} --verbose" if input == "t"
       execute_files(sort(files, index), mvc_keyword, terms, dir) if input == "p"
       abort                         if input == "q"
     end
