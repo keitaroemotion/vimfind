@@ -181,12 +181,13 @@ def execute_files(files, mvc_keyword, terms, dir, i=0)
   key_terms = get_words(terms)
   files.each_with_index do |f, index|
     if (!mvc_keyword || file_open(f, "r").include?(mvc_keyword))
-      print "#{replace(f, terms)} ? [v/q/w/p/l/d] "
+      print "#{replace(f, terms)} ? [v/q/w/p/l/d/#{'t'.magenta}] "
       input = $stdin.gets.chomp.downcase
       check_db(dir)                 if input == "d"
       system "vim #{f}"             if (input == "y" || input == "v")
       display_matches(f, key_terms) if input == "w"
       collect_funcs(f)              if input == "l"
+      system "ruby -I test #{f}"    if input == "t"
       execute_files(sort(files, index), mvc_keyword, terms, dir) if input == "p"
       abort                         if input == "q"
     end
