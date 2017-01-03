@@ -195,17 +195,22 @@ def test(f, terms, term="")
       line = line.strip
       line.include?("test ") && line.include?("do") && !line.start_with?("#")
     }.map{ |test|
-      test.gsub("test","").gsub("\"","").gsub("do", "")
+      test.gsub("test","").gsub("\"","").gsub("do", "").gsub('|','\|')
     }
 
     lines.each_with_index { |test, i|
-      puts "[#{i}] #{test}" 
+      puts "[#{i}] #{test.strip}" 
     }
-    term = "-n \"" + lines["/.*#{ask('[Enter term]')}.*".to_i].strip + "\""
+    term = fix_label(lines[ask('[Enter term]').to_i].strip) 
+    term = "-n /.*#{term}.*/"
   end
-  command =  "ruby -I test #{f} #{term} #{v}" 
-  puts command
+  command =  "ruby -I test #{f} #{term} #{v}"
+  puts command.green
   system command
+end
+
+def fix_label(label)
+  label.include?("  ") ? fix_label(label.gsub("  ", " ")) : label.gsub(" ","_")
 end
 
 def execute_files(files, mvc_keyword, terms, dir, i=0)
