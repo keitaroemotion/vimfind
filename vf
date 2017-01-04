@@ -229,17 +229,28 @@ def fix_label(label)
   label.include?("  ") ? fix_label(label.gsub("  ", " ")) : label.gsub(" ","_")
 end
 
+def open_https(f)
+  File.open(f, "r").each_line do |line|
+    line.split(' ').each do |token|
+      if token.start_with?("http")
+        system "open #{token}"
+      end
+    end
+  end
+end
+
 def execute_files(files, mvc_keyword, terms, dir, i=0)
   key_terms = get_words(terms)
   files.each_with_index do |f, index|
     if (!mvc_keyword || file_open(f, "r").include?(mvc_keyword))
-      print "#{replace(f, terms)} ? [v/q/w/p/l/d/#{'t'.magenta}] "
+      print "#{replace(f, terms)} ? [v/q/w/p/l/d/#{'t'.magenta}/u] "
       input = $stdin.gets.chomp.downcase
       check_db(dir)                 if input == "d"
       system "vim #{f}"             if (input == "y" || input == "v")
       display_matches(f, key_terms) if input == "w"
       collect_funcs(f)              if input == "l"
       test(f, terms)                if input == "t"
+      open_https(f)                 if input == "u"
       execute_files(sort(files, index), mvc_keyword, terms, dir) if input == "p"
       abort                         if input == "q"
     end
@@ -253,5 +264,21 @@ end
 mvc_keyword = terms.select{|x| x.include?(GREP) }[0] 
 mvc_keyword = mvc_keyword.gsub(GREP,"") if mvc_keyword 
 
-search_all(terms, directory, mvc_mode, mvc_keyword) 
+if ARGV[0] == ":wi"
+  wikidir =  "/usr/local/etc/vimfind/wiki"  
+  system "mkdir -p #{wikidir}"
+  if ARGV[1] == ":ls" || ARGV[1] == nil
+    system "ls #{wikidir}"
+  elsif ARGV[1] == "o" 
+    print "[term:] "
+    wikifile =  "#{wikidir}/#{$stdin.gets.chomp}"
+    abort "Does not Exist. #{wikifile}" if !File.exist?(wikifile)
+    open_https(wikifile)
+  else
+    wikifile =  "#{wikidir}/#{ARGV[1]}"
+    system "vim #{wikifile}"
+  end
+else
+  search_all(terms, directory, mvc_mode, mvc_keyword) 
+end
 
