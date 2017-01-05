@@ -279,18 +279,29 @@ def look_for_similar_file(dir, tag)
   abort "done:"
 end
 
+def open(cmd, wikidir)
+    term = cmd
+    print "[term:] " if !cmd
+    term = $stdin.gets.chomp if !cmd
+    wikifile =  "#{wikidir}/#{term}"
+    wikifile = look_for_similar_file(wikidir, term) if !File.exist?(wikifile)
+    open_https(wikifile)
+end
+
+wikidir =  "/usr/local/etc/vimfind/wiki"  
+open(ARGV[1], wikidir) if ARGV[0] == ":wio"
 if ARGV[0] == ":wi"
-  wikidir =  "/usr/local/etc/vimfind/wiki"  
   system "mkdir -p #{wikidir}"
   if ARGV[1] == ":ls" || ARGV[1] == nil
     enlist_wiki(wikidir, ARGV[2])
   elsif ARGV[1] == "o" 
-    term = ARGV[2]
-    print "[term:] " if !ARGV[2]
-    term = $stdin.gets.chomp if !ARGV[2]
-    wikifile =  "#{wikidir}/#{term}"
-    wikifile = look_for_similar_file(wikidir, term) if !File.exist?(wikifile)
-    open_https(wikifile)
+    open(ARGV[2], wikidir)
+#    term = ARGV[2]
+#    print "[term:] " if !ARGV[2]
+#    term = $stdin.gets.chomp if !ARGV[2]
+#    wikifile =  "#{wikidir}/#{term}"
+#    wikifile = look_for_similar_file(wikidir, term) if !File.exist?(wikifile)
+#    open_https(wikifile)
   else
     wikifile =  "#{wikidir}/#{ARGV[1]}"
     system "vim #{wikifile}"

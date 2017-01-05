@@ -87,8 +87,8 @@ vf :wi [term]
 `
 
 open urls in an article
-`
-vf :wi o term
-`
 
+`
+vf :wio term
+`
 
