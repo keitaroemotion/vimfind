@@ -70,4 +70,25 @@ You can access to the db schema by entering "d", and
 when you enter any keyword, the result would come up
 with highlighted results
 
+===============
+Wiki Features
+===============
+
+vf supports local wiki management features.
+
+enlist the current articles
+`
+vf :wi
+`
+
+add article
+`
+vf :wi [term]
+`
+
+open urls in an article
+`
+vf :wi o term
+`
+
 

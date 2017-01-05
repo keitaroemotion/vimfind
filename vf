@@ -264,20 +264,39 @@ end
 mvc_keyword = terms.select{|x| x.include?(GREP) }[0] 
 mvc_keyword = mvc_keyword.gsub(GREP,"") if mvc_keyword 
 
+def enlist_wiki(wikidir, arg)
+  system "ls #{wikidir}" if !arg 
+  look_for_similar_file(wikidir, arg) if arg
+end
+
+def look_for_similar_file(dir, tag)
+  Dir["#{dir}/*"].each do |file|
+    if File.basename(file).start_with?(tag)
+      print "#{File.basename(file)}[Y/n]? "
+      return file if $stdin.gets.chomp.downcase == "y"
+    end
+  end
+  abort "done:"
+end
+
 if ARGV[0] == ":wi"
   wikidir =  "/usr/local/etc/vimfind/wiki"  
   system "mkdir -p #{wikidir}"
   if ARGV[1] == ":ls" || ARGV[1] == nil
-    system "ls #{wikidir}"
+    enlist_wiki(wikidir, ARGV[2])
   elsif ARGV[1] == "o" 
-    print "[term:] "
-    wikifile =  "#{wikidir}/#{$stdin.gets.chomp}"
-    abort "Does not Exist. #{wikifile}" if !File.exist?(wikifile)
+    term = ARGV[2]
+    print "[term:] " if !ARGV[2]
+    term = $stdin.gets.chomp if !ARGV[2]
+    wikifile =  "#{wikidir}/#{term}"
+    wikifile = look_for_similar_file(wikidir, term) if !File.exist?(wikifile)
     open_https(wikifile)
   else
     wikifile =  "#{wikidir}/#{ARGV[1]}"
     system "vim #{wikifile}"
   end
+elsif ARGV[0] == ":wils"  
+  enlist_wiki(wikidir, ARGV[1])
 else
   search_all(terms, directory, mvc_mode, mvc_keyword) 
 end
