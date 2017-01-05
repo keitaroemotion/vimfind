@@ -14,10 +14,10 @@ mvc_mode = ARGV.include?("-mvc") ? add_test(["controllers","models","views", "ba
 
 def get_directory()
   dir = ARGV.select {|arg| File.directory?(arg) }
-  dir.size == 0 ? Dir.pwd : dir
+  dir.size == 0 ? Dir.pwd : dir[0]
 end
 
-directory = "#{get_directory[0]}/**/*".gsub("//","/") 
+directory = "#{get_directory}/**/*".gsub("//","/") 
 terms = terms.select {|term| ![directory, "-mvc"].include?(term) }.map{ |arg| arg.downcase }
 
 def file_open(file, mode)
@@ -248,7 +248,7 @@ def execute_files(files, mvc_keyword, terms, dir, i=0)
       input = $stdin.gets.chomp.downcase
       check_db(dir)                 if input == "d"
       system "vim #{f}"             if (input == "y" || input == "v")
-      system "open #{f}"            if input == "o"
+      open_file(f)                  if input == "o"
       display_matches(f, key_terms) if input == "w"
       collect_funcs(f)              if input == "l"
       test(f, terms)                if input == "t"
@@ -257,6 +257,11 @@ def execute_files(files, mvc_keyword, terms, dir, i=0)
       abort                         if input == "q"
     end
   end
+end
+
+def open_file(f)
+  basename = File.basename(f).gsub('(','\(').gsub(')','\)').gsub(" ",'\ ')
+  system "open #{File.dirname(f)}/#{basename}"
 end
 
 def search_all(terms, dir, mvc, mvc_keyword)
