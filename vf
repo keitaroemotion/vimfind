@@ -13,10 +13,11 @@ terms =  ARGV.size > 0 ? ARGV : disp_instruction
 mvc_mode = ARGV.include?("-mvc") ? add_test(["controllers","models","views", "backends"]) : []
 
 def get_directory()
-  ARGV.select {|arg| File.directory?(arg) }
+  dir = ARGV.select {|arg| File.directory?(arg) }
+  dir.size == 0 ? Dir.pwd : dir
 end
 
-directory = "#{get_directory[0]}**/*" 
+directory = "#{get_directory[0]}/**/*".gsub("//","/") 
 terms = terms.select {|term| ![directory, "-mvc"].include?(term) }.map{ |arg| arg.downcase }
 
 def file_open(file, mode)
@@ -243,10 +244,11 @@ def execute_files(files, mvc_keyword, terms, dir, i=0)
   key_terms = get_words(terms)
   files.each_with_index do |f, index|
     if (!mvc_keyword || file_open(f, "r").include?(mvc_keyword))
-      print "#{replace(f, terms)} ? [v/q/w/p/l/d/#{'t'.magenta}/u] "
+      print "#{replace(f, terms)} ? [v/q/w/p/l/d/#{'t'.magenta}/u/o] "
       input = $stdin.gets.chomp.downcase
       check_db(dir)                 if input == "d"
       system "vim #{f}"             if (input == "y" || input == "v")
+      system "open #{f}"            if input == "o"
       display_matches(f, key_terms) if input == "w"
       collect_funcs(f)              if input == "l"
       test(f, terms)                if input == "t"
@@ -296,12 +298,6 @@ if ARGV[0] == ":wi"
     enlist_wiki(wikidir, ARGV[2])
   elsif ARGV[1] == "o" 
     open(ARGV[2], wikidir)
-#    term = ARGV[2]
-#    print "[term:] " if !ARGV[2]
-#    term = $stdin.gets.chomp if !ARGV[2]
-#    wikifile =  "#{wikidir}/#{term}"
-#    wikifile = look_for_similar_file(wikidir, term) if !File.exist?(wikifile)
-#    open_https(wikifile)
   else
     wikifile =  "#{wikidir}/#{ARGV[1]}"
     system "vim #{wikifile}"
