@@ -226,15 +226,25 @@ def test(f, terms, term="", options=["v","u","q"])
   test f, terms
 end
 
+def format_into_mac(t)
+  t.chomp.gsub('(','\(').gsub(')','\)').gsub(" ",'\ ')
+end
+
 def fix_label(label)
   label.include?("  ") ? fix_label(label.gsub("  ", " ")) : label.gsub(" ","_")
 end
 
 def open_https(f)
+  puts f.green 
   File.open(f, "r").each_line do |line|
-    line.split(' ').each do |token|
-      if token.start_with?("http")
-        system "open #{token}"
+    if File.exist?(line.strip)
+        system "open #{format_into_mac(line.strip)}"
+    elsif File.exist?(format_into_mac(line.strip))
+        system "open #{format_into_mac(line)}"
+    else
+      line.split(' ').each do |token|
+        token = format_into_mac(token.chomp)
+        system "open #{token}" if (token.start_with?("http"))
       end
     end
   end
@@ -259,8 +269,9 @@ def execute_files(files, mvc_keyword, terms, dir, i=0)
   end
 end
 
+
 def open_file(f)
-  basename = File.basename(f).gsub('(','\(').gsub(')','\)').gsub(" ",'\ ')
+  basename = format_into_mac(File.basename(f))
   system "open #{File.dirname(f)}/#{basename}"
 end
 
@@ -295,6 +306,14 @@ def open(cmd, wikidir)
     open_https(wikifile)
 end
 
+def supply(file)
+  original_file = file
+  file = "#{Dir.pwd}/#{file}" 
+  file = original_file            if !File.exist?(file)
+  abort "#{file} does not exist." if !File.exist?(file)
+  file
+end
+
 wikidir =  "/usr/local/etc/vimfind/wiki"  
 open(ARGV[1], wikidir) if ARGV[0] == ":wio"
 if ARGV[0] == ":wi"
@@ -305,7 +324,8 @@ if ARGV[0] == ":wi"
     open(ARGV[2], wikidir)
   else
     wikifile =  "#{wikidir}/#{ARGV[1]}"
-    system "vim #{wikifile}"
+    system "echo #{supply(ARGV[2])} > #{wikifile}" if ARGV[2]
+    system "vim #{wikifile}" if !ARGV[2]
   end
 elsif ARGV[0] == ":wils"  
   enlist_wiki(wikidir, ARGV[1])
