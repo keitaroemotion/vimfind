@@ -3,6 +3,8 @@ require 'colorize'
 
 GREP = "w:"
 
+WIKIDIR =  "/usr/local/etc/vimfind/wiki"  
+
 def disp_instruction() abort "\nyou need argument.\n".red end
 
 def add_test(arr)
@@ -234,11 +236,23 @@ def fix_label(label)
   label.include?("  ") ? fix_label(label.gsub("  ", " ")) : label.gsub(" ","_")
 end
 
+def is_source(line)
+  [".rb", ".xml", ".js", ".html", ".erb"].each do |ext|
+    return true if line.end_with?(ext)
+  end
+  return true if File.directory?(line)
+  return false
+end
+
 def open_https(f)
   puts f.green 
   File.open(f, "r").each_line do |line|
     if File.exist?(line.strip)
-        system "open #{format_into_mac(line.strip)}"
+        if is_source(line.strip)
+          system "vim #{format_into_mac(line.strip)}" 
+        else
+          system "open #{format_into_mac(line.strip)}" 
+        end
     elsif File.exist?(format_into_mac(line.strip))
         system "open #{format_into_mac(line)}"
     else
@@ -250,15 +264,21 @@ def open_https(f)
   end
 end
 
+def add_file_to_wiki(f)
+    print "[TERM] "
+    system "echo #{f} >> #{WIKIDIR}/#{$stdin.gets.chomp}" 
+end
+
 def execute_files(files, mvc_keyword, terms, dir, i=0)
   key_terms = get_words(terms)
   files.each_with_index do |f, index|
     if (!mvc_keyword || file_open(f, "r").include?(mvc_keyword))
-      print "#{replace(f, terms)} ? [v/q/w/p/l/d/#{'t'.magenta}/u/o] "
+      print "#{replace(f, terms)} ? [v/q/w/p/l/d/#{'t'.magenta}/u/o/a] "
       input = $stdin.gets.chomp.downcase
       check_db(dir)                 if input == "d"
       system "vim #{f}"             if (input == "y" || input == "v")
       open_file(f)                  if input == "o"
+      add_file_to_wiki(f)           if input == "a"
       display_matches(f, key_terms) if input == "w"
       collect_funcs(f)              if input == "l"
       test(f, terms)                if input == "t"
@@ -314,21 +334,20 @@ def supply(file)
   file
 end
 
-wikidir =  "/usr/local/etc/vimfind/wiki"  
-open(ARGV[1], wikidir) if ARGV[0] == ":wio"
+open(ARGV[1], WIKIDIR) if ARGV[0] == ":wio"
 if ARGV[0] == ":wi"
-  system "mkdir -p #{wikidir}"
+  system "mkdir -p #{WIKIDIR}"
   if ARGV[1] == ":ls" || ARGV[1] == nil
-    enlist_wiki(wikidir, ARGV[2])
+    enlist_wiki(WIKIDIR, ARGV[2])
   elsif ARGV[1] == "o" 
-    open(ARGV[2], wikidir)
+    open(ARGV[2], WIKIDIR)
   else
-    wikifile =  "#{wikidir}/#{ARGV[1]}"
-    system "echo #{supply(ARGV[2])} > #{wikifile}" if ARGV[2]
+    wikifile =  "#{WIKIDIR}/#{ARGV[1]}"
+    system "echo #{supply(ARGV[2])} >> #{wikifile}" if ARGV[2]
     system "vim #{wikifile}" if !ARGV[2]
   end
 elsif ARGV[0] == ":wils"  
-  enlist_wiki(wikidir, ARGV[1])
+  enlist_wiki(WIKIDIR, ARGV[1])
 else
   search_all(terms, directory, mvc_mode, mvc_keyword) 
 end
