@@ -317,10 +317,19 @@ def look_for_similar_file(dir, tag)
   abort "done:"
 end
 
+def get_term(cmd, wikidir)
+  term = cmd
+  print "[term:] " if !cmd
+  term =  $stdin.gets.chomp if !cmd
+  if cmd == ":r"
+    ls = Dir["#{wikidir}/*"]
+    term = File.basename ls[Random.rand(ls.size-1)] 
+  end
+  term
+end
+
 def open(cmd, wikidir)
-    term = cmd
-    print "[term:] " if !cmd
-    term = $stdin.gets.chomp if !cmd
+    term = get_term(cmd, wikidir)
     wikifile =  "#{wikidir}/#{term}"
     wikifile = look_for_similar_file(wikidir, term) if !File.exist?(wikifile)
     open_https(wikifile)
