@@ -66,6 +66,8 @@ d ... Can easily access to your db schema.
 
 t ... Run Unit Test for the selected file
 
+r ... run rubocop for the target file
+
 You can access to the db schema by entering "d", and
 when you enter any keyword, the result would come up
 with highlighted results
