@@ -246,10 +246,11 @@ end
 
 def open_https(f)
   puts f.green 
+  vim_targets = []
   File.open(f, "r").each_line do |line|
     if File.exist?(line.strip)
         if is_source(line.strip)
-          system "vim #{format_into_mac(line.strip)}" 
+          vim_targets.push "#{format_into_mac(line.strip)}" 
         else
           system "open #{format_into_mac(line.strip)}" 
         end
@@ -262,6 +263,7 @@ def open_https(f)
       end
     end
   end
+  system vim_targets.uniq.inject("vim "){|a, b| "#{a} #{b}"} if vim_targets.size > 0
 end
 
 def add_file_to_wiki(f)
@@ -273,7 +275,16 @@ def execute_files(files, mvc_keyword, terms, dir, i=0)
   key_terms = get_words(terms)
   files.each_with_index do |f, index|
     if (!mvc_keyword || file_open(f, "r").include?(mvc_keyword))
-      print "#{replace(f, terms)} ? [v/q/w/p/l/d/#{'t'.magenta}/u/o/a/r] "
+      file_path = replace(f, terms)
+      puts "dir:  [#{replace(File.dirname(f), terms)}]"
+      puts "file: [#{replace(File.basename(f), terms)}] ?"
+      puts "[v: open with vim    ][q: quit                ]"
+      puts "[w: show grep result ][p: back to prev file   ]"
+      puts "[l: list methods     ][d: db schema search    ]"
+      puts "[t: execute test     ][u: open https          ]"
+      puts "[o: open file        ][a: add file to wiki    ]"
+      puts "[r: rubocop search   ]"
+      print "Enter: "
       input = $stdin.gets.chomp.downcase
       check_db(dir)                 if input == "d"
       system "vim #{f}"             if (input == "y" || input == "v")
