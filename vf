@@ -287,7 +287,7 @@ def execute_files(files, mvc_keyword, terms, dir, i=0)
       print "Enter: "
       input = $stdin.gets.chomp.downcase
       check_db(dir)                 if input == "d"
-      system "vim #{f}"             if (input == "y" || input == "v")
+      system "vim #{format_into_mac(f)}"             if (input == "y" || input == "v")
       open_file(f)                  if input == "o"
       system "rubocop #{f}"         if input == "r"
       add_file_to_wiki(f)           if input == "a"
@@ -369,6 +369,9 @@ if ARGV[0] == ":wi"
   end
 elsif ARGV[0] == ":wils"  
   enlist_wiki(WIKIDIR, ARGV[1])
+elsif ARGV[0] == "routes"  
+  tail = " | grep #{ARGV[1]}" if ARGV[1]
+  system "bin/rake routes#{tail}" 
 else
   search_all(terms, directory, mvc_mode, mvc_keyword) 
 end
