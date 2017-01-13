@@ -278,12 +278,13 @@ def execute_files(files, mvc_keyword, terms, dir, i=0)
       file_path = replace(f, terms)
       puts "dir:  [#{replace(File.dirname(f), terms)}]"
       puts "file: [#{replace(File.basename(f), terms)}] ?"
-      puts "[v: open with vim    ][q: quit                ]"
-      puts "[w: show grep result ][p: back to prev file   ]"
-      puts "[l: list methods     ][d: db schema search    ]"
-      puts "[t: execute test     ][u: open https          ]"
-      puts "[o: open file        ][a: add file to wiki    ]"
-      puts "[r: rubocop search   ]"
+      puts "[v: open with vim    ][q: quit                ]".yellow
+      puts "[w: show grep result ][p: back to prev file   ]".yellow
+      puts "[l: list methods     ][d: db schema search    ]".yellow
+      puts "[t: execute test     ][u: open https          ]".yellow
+      puts "[o: open file        ][a: add file to wiki    ]".yellow
+      puts "[r: rubocop search   ][b: blame               ]".yellow
+
       print "Enter: "
       input = $stdin.gets.chomp.downcase
       check_db(dir)                 if input == "d"
@@ -295,6 +296,7 @@ def execute_files(files, mvc_keyword, terms, dir, i=0)
       collect_funcs(f)              if input == "l"
       test(f, terms)                if input == "t"
       open_https(f)                 if input == "u"
+      system "git blame #{f}"       if input == "b"
       execute_files(sort(files, index), mvc_keyword, terms, dir) if input == "p"
       abort                         if input == "q"
     end
