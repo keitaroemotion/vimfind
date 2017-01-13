@@ -222,7 +222,7 @@ def test(f, terms, term="", options=["v","u","q"])
     term = fix_label(lines[ask('[Enter Number]', f, terms).to_i].strip) 
     term = "-n /.*#{term}.*/"
   end
-  command =  "ruby -I test #{f} #{term} #{v}"
+  command =  "bundle exec ruby -I test #{f} #{term} #{v}"
   puts command.green
   system command
   test f, terms
