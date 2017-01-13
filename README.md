@@ -2,6 +2,18 @@
 vimfind
 ==============================
 
+Premise:
+
+Following command has to be available
+
+`
+$ vim
+`
+
+`
+$ git
+`
+
 This is a script to enable you to easily edit your files in a directory without going into the nest subdirectories.
 
 vf stands for vimfind.
