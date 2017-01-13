@@ -37,7 +37,7 @@ $ vf [keyword]
 the following command allows you to grep and edit matching files:
 
 `
-$ vf w:[keyword]
+$ vf ?[keyword]
 `
 
 ================
@@ -55,7 +55,7 @@ $ vf -mvc [@name]
 List Files Contains the keyword
 
 `
-$ vf -mvc [@name] w:[keyword]
+$ vf -mvc [@name] ?[keyword]
 `
 
 You encounter with the following suggestion while searching:
@@ -79,6 +79,8 @@ d ... Can easily access to your db schema.
 t ... Run Unit Test for the selected file
 
 r ... run rubocop for the target file
+
+a ... add current file name to wiki 
 
 You can access to the db schema by entering "d", and
 when you enter any keyword, the result would come up
