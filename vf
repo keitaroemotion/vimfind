@@ -271,35 +271,41 @@ def add_file_to_wiki(f)
     system "echo #{f} >> #{WIKIDIR}/#{$stdin.gets.chomp}" 
 end
 
+def execute_file(dir, files, f, index, mvc_keyword, terms, next_flag=false)
+  if (!mvc_keyword || file_open(f, "r").include?(mvc_keyword))
+    file_path = replace(f, terms)
+    puts "dir:  [#{replace(File.dirname(f), terms)}]"
+    puts "file: [#{replace(File.basename(f), terms)}] ?"
+    puts "[v: open with vim    ][q: quit                ]".yellow
+    puts "[w: show grep result ][p: back to prev file   ]".yellow
+    puts "[l: list methods     ][d: db schema search    ]".yellow
+    puts "[t: execute test     ][u: open https          ]".yellow
+    puts "[o: open file        ][a: add file to wiki    ]".yellow
+    puts "[r: rubocop search   ][b: blame               ]".yellow
+
+    print "[p:prev | n:next]Enter: "
+    input = $stdin.gets.chomp.downcase
+    check_db(dir)                 if input == "d"
+    system "vim #{format_into_mac(f)}"             if (input == "y" || input == "v")
+    open_file(f)                  if input == "o"
+    system "rubocop #{f}"         if input == "r"
+    add_file_to_wiki(f)           if input == "a"
+    display_matches(f, key_terms) if input == "w"
+    collect_funcs(f)              if input == "l"
+    test(f, terms)                if input == "t"
+    open_https(f)                 if input == "u"
+    system "git blame #{f}"       if input == "b"
+    execute_files(sort(files, index), mvc_keyword, terms, dir) if input == "p"
+    abort                         if input == "q"
+    next_flag = true              if input == "n"
+    execute_file(dir, files, f, index, mvc_keyword, terms) unless next_flag
+  end
+end
+
 def execute_files(files, mvc_keyword, terms, dir, i=0)
   key_terms = get_words(terms)
   files.each_with_index do |f, index|
-    if (!mvc_keyword || file_open(f, "r").include?(mvc_keyword))
-      file_path = replace(f, terms)
-      puts "dir:  [#{replace(File.dirname(f), terms)}]"
-      puts "file: [#{replace(File.basename(f), terms)}] ?"
-      puts "[v: open with vim    ][q: quit                ]".yellow
-      puts "[w: show grep result ][p: back to prev file   ]".yellow
-      puts "[l: list methods     ][d: db schema search    ]".yellow
-      puts "[t: execute test     ][u: open https          ]".yellow
-      puts "[o: open file        ][a: add file to wiki    ]".yellow
-      puts "[r: rubocop search   ][b: blame               ]".yellow
-
-      print "Enter: "
-      input = $stdin.gets.chomp.downcase
-      check_db(dir)                 if input == "d"
-      system "vim #{format_into_mac(f)}"             if (input == "y" || input == "v")
-      open_file(f)                  if input == "o"
-      system "rubocop #{f}"         if input == "r"
-      add_file_to_wiki(f)           if input == "a"
-      display_matches(f, key_terms) if input == "w"
-      collect_funcs(f)              if input == "l"
-      test(f, terms)                if input == "t"
-      open_https(f)                 if input == "u"
-      system "git blame #{f}"       if input == "b"
-      execute_files(sort(files, index), mvc_keyword, terms, dir) if input == "p"
-      abort                         if input == "q"
-    end
+    execute_file dir, files, f, index, mvc_keyword, terms
   end
 end
 
@@ -357,8 +363,7 @@ def supply(file)
   file
 end
 
-open(ARGV[1], WIKIDIR) if ARGV[0] == ":wio"
-if ARGV[0] == ":wi"
+def operate_wiki
   system "mkdir -p #{WIKIDIR}"
   if ARGV[1] == ":ls" || ARGV[1] == nil
     enlist_wiki(WIKIDIR, ARGV[2])
@@ -369,6 +374,11 @@ if ARGV[0] == ":wi"
     system "echo #{supply(ARGV[2])} >> #{wikifile}" if ARGV[2]
     system "vim #{wikifile}" if !ARGV[2]
   end
+end
+
+open(ARGV[1], WIKIDIR) if ARGV[0] == ":wio"
+if ARGV[0] == ":wi"
+  operate_wiki 
 elsif ARGV[0] == ":wils"  
   enlist_wiki(WIKIDIR, ARGV[1])
 elsif ARGV[0] == "routes"  
