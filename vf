@@ -179,6 +179,14 @@ def check_db(dir, key="create_table ", res=[], hash={})
   end
 end
 
+def ask_no_abort(msg, f, terms, a=false)
+  print "#{msg} "
+  input = $stdin.gets.chomp
+  return nil if input == "q"
+  test(f, terms) if input == ""
+  a ? input.split(" ") : input
+end
+
 def ask(msg, f, terms, a=false)
   print "#{msg} "
   input = $stdin.gets.chomp
@@ -200,7 +208,8 @@ def share_nothing(a1, a2)
 end
 
 def test(f, terms, term="", options=["v","u","q"])
-  commands = ask("[v:verbose u:unit_test q:quit]", f, terms, true)
+  commands = ask_no_abort("[v:verbose u:unit_test q:quit]", f, terms, true)
+  return unless commands
   test(f, terms) if share_nothing(commands, options)
   v = contains(commands, "v") ? "--verbose" : ""
   if commands.include?("u")
@@ -214,7 +223,7 @@ def test(f, terms, term="", options=["v","u","q"])
       test.gsub("test","").gsub("\"","").gsub("do", "").gsub('|','\|')
     }
 
-    abort "Nothing Found" if lines.size == 0
+    return "Nothing Found" if lines.size == 0
     lines.each_with_index { |test, i|
       puts "[#{i}] #{test.strip}" 
     }
