@@ -181,9 +181,8 @@ end
 
 def ask_no_abort(msg, f, terms, a=false)
   print "#{msg} "
-  input = $stdin.gets.chomp
-  return nil if input == "q"
-  test(f, terms) if input == ""
+  input = $stdin.gets.chomp.strip
+  return nil if input == "q" || input == ""
   a ? input.split(" ") : input
 end
 
@@ -209,6 +208,7 @@ end
 
 def test(f, terms, term="", options=["v","u","q"])
   commands = ask_no_abort("[v:verbose u:unit_test q:quit]", f, terms, true)
+  puts "commands| #{commands}"
   return unless commands
   test(f, terms) if share_nothing(commands, options)
   v = contains(commands, "v") ? "--verbose" : ""
@@ -286,7 +286,7 @@ def execute_file(dir, files, f, index, mvc_keyword, terms, next_flag=false)
     puts "dir:  [#{replace(File.dirname(f), terms)}]"
     puts "file: [#{replace(File.basename(f), terms)}] ?"
     puts "[v: open with vim    ][q: quit                ]".yellow
-    puts "[w: show grep result ][p: back to prev file   ]".yellow
+    puts "[w: show grep result ][s: search another file ]".yellow
     puts "[l: list methods     ][d: db schema search    ]".yellow
     puts "[t: execute test     ][u: open https          ]".yellow
     puts "[o: open file        ][a: add file to wiki    ]".yellow
@@ -307,6 +307,10 @@ def execute_file(dir, files, f, index, mvc_keyword, terms, next_flag=false)
     execute_files(sort(files, index), mvc_keyword, terms, dir) if input == "p"
     abort                         if input == "q"
     next_flag = true              if input == "n"
+    if input == "s"
+      print "[term:] "
+      search_all($stdin.gets.chomp.split(' '), dir, [], mvc_keyword) 
+    end
     execute_file(dir, files, f, index, mvc_keyword, terms) unless next_flag
   end
 end
