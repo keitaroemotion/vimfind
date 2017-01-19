@@ -210,6 +210,7 @@ def test(f, terms, term="", options=["v","u","q"])
   commands = ask_no_abort("[v:verbose u:unit_test q:quit]", f, terms, true)
   puts "commands| #{commands}"
   return unless commands
+  return unless commands.select{|x| ["v", "u", "q"].include?(x)}.size > 0 
   test(f, terms) if share_nothing(commands, options)
   v = contains(commands, "v") ? "--verbose" : ""
   if commands.include?("u")
@@ -376,6 +377,76 @@ def supply(file)
   file
 end
 
+def collect_yml(target, keyword)
+  require 'yaml'
+  fixtures = "test/fixtures"
+  hash = {}
+  Dir["#{fixtures}/**/*"].select{|x| x.end_with?(".yml")}.each do |file|
+    begin
+      hash[file] = YAML.load_file(file)
+    rescue
+    end
+  end
+
+  def there_it_is(hash, keyword, target, target_slip)
+    hash.each do |key, value|
+      begin
+        if File.basename(key).start_with?(target)
+          value.each do |v|
+            target_slip = v if v[0].include?(keyword)
+          end
+          if target_slipt.size == 0
+            puts "none found".red
+          end
+        end  
+      rescue
+      end
+    end    
+    target_slip
+  end
+
+  target_slip = there_it_is hash, keyword, target , {}
+  abort "none found." if target_slip.size == 0
+  
+  def aaa(hash, head, blob, a="  ")
+    begin
+      blob.each do |b|
+        b.each do |bb|
+          puts "#{a}#{bb}".to_s.yellow
+          tiny_target = there_it_is(hash, "#{bb[1]}",  "#{bb[0]}", {})
+          if tiny_target.size > 0
+            puts "#{a}" + tiny_target[0].to_s.magenta
+            puts "#{a}" + tiny_target[1].to_s.green
+            #aaa(hash, tiny_target[0], tiny_target[1], "#{a}")
+          end
+        end
+      end
+      hash
+    rescue  
+    end  
+  end
+
+  target_key = target_slip[0]
+  puts target_key.cyan
+  aaa(hash, target_key, target_slip[1..target_slip.size-1])
+#  target_slip[1..target_slip.size-1].each do |k|
+#    k.each do |kk|
+#      puts kk.to_s.yellow
+#      tiny_target = there_it_is(hash, "#{kk[1]}",  "#{kk[0]}", {})
+#      if tiny_target.size > 0
+#        puts "  "+tiny_target[0].to_s.magenta
+#        puts "  " +tiny_target[1].to_s.green
+#      end
+#    end
+#  end
+
+  hash.each do |key, value|
+      
+  end
+end
+
+
+
 def operate_wiki
   system "mkdir -p #{WIKIDIR}"
   if ARGV[1] == ":ls" || ARGV[1] == nil
@@ -397,6 +468,8 @@ elsif ARGV[0] == ":wils"
 elsif ARGV[0] == "routes"  
   tail = " | grep #{ARGV[1]}" if ARGV[1]
   system "bin/rake routes#{tail}" 
+elsif ARGV[0] == "yml"  
+  collect_yml ARGV[1], ARGV[2]
 else
   search_all(terms, directory, mvc_mode, mvc_keyword) 
 end
