@@ -17,7 +17,7 @@ def files_to_hash(hashes={}, hash={}, values=[])
   ls_files.each do |file|
     File.open(file, "r").to_a.select{|x| !x.strip.start_with?("#")}.reverse.each do |line|
       if is_key line
-        hash[line.gsub(":","")] = values 
+        hash[line.gsub(":","")] = values.reverse 
         values = []
       else
         values.push line
