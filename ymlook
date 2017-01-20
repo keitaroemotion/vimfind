@@ -46,7 +46,7 @@ def count_pipe(t)
   t.split('').select {|x| x == "|" }.size 
 end
 
-def look_up(fix_target, term, option, tab="", suspects=[], delegates=[])
+def look_up(fix_target, term, option, tab="  |", suspects=[], delegates=[])
   abort "empty input." if ARGV.size < 3
   files_to_hash.each do |k, v|
     if k.start_with?(fix_target)
