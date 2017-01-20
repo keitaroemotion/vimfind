@@ -27,11 +27,12 @@ def files_to_hash(hashes={}, hash={}, values=[])
   hashes
 end
 
-def extract(key_ls)
-  
+def is_relational(_key)
+  files_to_hash.keys.map{|file| File.basename(file) }.include?("#{_key}".pluralize)
 end
 
-def look_up(fix_target, term, tab="", delegates=[])
+def look_up(fix_target, term, option, tab="", delegates=[])
+  abort "empty input." if ARGV.size < 3
   files_to_hash.each do |k, v|
     if k.start_with?(fix_target)
       result = v.keys.select{|key| key.start_with?(term) }
@@ -41,10 +42,9 @@ def look_up(fix_target, term, tab="", delegates=[])
   yml, key, values = delegates[0]
   puts "#{tab}#{yml} [#{key.chomp}]" if tab == ""
   values.each do |_key, value| 
-    puts "#{tab}#{_key}: #{value}"
-    if files_to_hash.keys.map{|file| File.basename(file) }.include?("#{_key}".pluralize)
-      look_up(_key.pluralize, value, "  #{tab}|")
-    end  
+    relational = is_relational _key
+    puts "#{tab}#{_key}: #{value}" if option == false || relational
+    look_up(_key.pluralize, value, option, "  #{tab}|") if relational
   end
 end
 
@@ -53,7 +53,9 @@ def list()
 end
 
 def help()
-  puts "ymlook [list]: list fixtures"
+  puts "ymlook list: list fixtures"
+  puts "ymlook / [fixture_name] [key_name]: list fixture relations "
+  puts "ymlook /: [fixture_name] [key_name]: list fixture relations (related part only) "
 end
 
 term = ARGV[0]
@@ -61,8 +63,10 @@ term = ARGV[0]
 case term
 when "list"
   list
-when "term"  
-  look_up ARGV[1], ARGV[2]
+when "/:"  
+  look_up ARGV[1], ARGV[2], true
+when "/"  
+  look_up ARGV[1], ARGV[2], false
 else
   help
 end
