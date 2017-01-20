@@ -46,7 +46,7 @@ def count_pipe(t)
   t.split('').select {|x| x == "|" }.size 
 end
 
-def look_up(fix_target, term, option, tab="#{fix_target}|", suspects=[], delegates=[])
+def look_up(fix_target, term, option, tab="", suspects=[], delegates=[])
   abort "empty input." if ARGV.size < 3
   files_to_hash.each do |k, v|
     if k.start_with?(fix_target)
@@ -55,7 +55,7 @@ def look_up(fix_target, term, option, tab="#{fix_target}|", suspects=[], delegat
     end  
   end
 
-  if delegates.size == 0 && count_pipe(tab) > 1
+  if delegates.size == 0 && count_pipe(tab) > 0
     suspects.push term 
   end
 
@@ -87,15 +87,24 @@ if File.exist?(LOG)
   system "rm #{LOG}"
 end
 
+def w()
+  write "[#{ARGV[1]}]"
+  write ""
+end
+
+
 case term
 when "list"
   list
 when "/:"  
+  w
   look_up(ARGV[1], ARGV[2], true).each {|x| puts x.red}
 when "/w"  
+  w
   look_up(ARGV[1], ARGV[2], false).each {|x| puts x.red}
   system "vim #{LOG}"
 when "/"  
+  w
   look_up(ARGV[1], ARGV[2], false).each {|x| puts x.red}
 else
   help
