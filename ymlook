@@ -47,7 +47,7 @@ def look_up(fix_target, term, option, tab="", delegates=[])
   files_to_hash.each do |k, v|
     if k.start_with?(fix_target)
       result = v.keys.select{|key| key.start_with?(term) }
-      delegates.push [k, result[0], v[result[0]].map{|x| x.split(":").map{|a| a.strip}}] if result.size > 0
+      delegates.push [k, result[0], v[result[0]].map{|x| x.split(": ").map{|a| a.strip}}] if result.size > 0
     end  
   end
   yml, key, values = delegates[0]
