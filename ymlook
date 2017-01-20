@@ -1,0 +1,68 @@
+#!/usr/bin/env ruby
+
+require 'active_support/inflector'
+require "colorize"
+
+def ls_files()
+  Dir["#{Dir.pwd}/test/fixtures/*.yml"].to_a 
+end
+
+def is_key(line)
+  !line.start_with?("  ")
+end
+
+def files_to_hash(hashes={}, hash={}, values=[])
+  ls_files.each do |file|
+    File.open(file, "r").to_a.select{|x| !x.strip.start_with?("#")}.reverse.each do |line|
+      if is_key line
+        hash[line.gsub(":","")] = values 
+        values = []
+      else
+        values.push line
+      end
+    end
+    hashes[File.basename(file).gsub(".yml","")] = hash
+    hash = {}
+  end
+  hashes
+end
+
+def extract(key_ls)
+  
+end
+
+def look_up(fix_target, term, tab="", delegates=[])
+  files_to_hash.each do |k, v|
+    if k.start_with?(fix_target)
+      result = v.keys.select{|key| key.start_with?(term) }
+      delegates.push [k, result[0], v[result[0]].map{|x| x.split(":").map{|a| a.strip}}] if result.size > 0
+    end  
+  end
+  yml, key, values = delegates[0]
+  puts "#{tab}#{yml} [#{key.chomp}]" if tab == ""
+  values.each do |_key, value| 
+    puts "#{tab}#{_key}: #{value}"
+    if files_to_hash.keys.map{|file| File.basename(file) }.include?("#{_key}".pluralize)
+      look_up(_key.pluralize, value, "  #{tab}|")
+    end  
+  end
+end
+
+def list()
+  files_to_hash.keys.each {|x|  puts x.to_s }
+end
+
+def help()
+  puts "ymlook [list]: list fixtures"
+end
+
+term = ARGV[0]
+
+case term
+when "list"
+  list
+when "term"  
+  look_up ARGV[1], ARGV[2]
+else
+  help
+end

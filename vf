@@ -50,7 +50,11 @@ def includes(file, terms, words_in_file_name=true, words_in_file_content=true)
   words_in_file_content =
     File.file?(file) && is_term_in_file(file, terms) if terms.size > 0
   words_in_file_name = non_terms.select{ |term|
-                         file.downcase.include?(term)
+                         if term.start_with?("^")
+                           file.downcase.include?("/"+term.gsub("^",""))
+                         else
+                           file.downcase.include?(term)
+                         end
                        }.size == non_terms.size if non_terms.size > 0
   words_in_file_name && words_in_file_content                      
 end
