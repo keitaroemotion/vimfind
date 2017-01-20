@@ -86,6 +86,23 @@ You can access to the db schema by entering "d", and
 when you enter any keyword, the result would come up
 with highlighted results
 
+--------------
+ymlook
+--------------
+
+ymlook is a powerful tool to search and vallidate the relations in your test/fixtures/ directory.
+
+`
+$ gem install inflector
+`
+
+then, you type as follows:
+
+`
+$ ymlook help
+`
+
+
 ===============
 Wiki Features
 ===============
