@@ -210,33 +210,58 @@ def share_nothing(a1, a2)
   a1.select{|x| a2.include?(x) }.size == 0
 end
 
-def test(f, terms, term="", options=["v","u","q"])
-  commands = ask_no_abort("[v:verbose u:unit_test q:quit]", f, terms, true)
+def survey_test(test_file)
+  target_file = "app/#{test_file[5..-1]}".gsub("_test.rb",".rb")
+  test_lines = File.read(test_file)
+  functions = File.read(target_file).each_line
+    .map {|line| line.strip }
+    .select { |line| line.start_with?("def ")}
+    .select { |func| !test_lines.include?(func) }
+    .map {|func| func.gsub("def ", "" )}
+  puts functions  
+end
+
+def unit_test(commands, f, options)
+  terms = commands.select{|x| !options.include?(x)}
+  lines = File.read(f).split("\n").select{ |line|
+    line = line.strip
+    line.include?("test ") && line.include?("do") && !line.start_with?("#") &&
+    (text_has(terms, line) || terms.size == 0) 
+  }.map{ |test|
+    test.gsub("test","").gsub("\"","").gsub("do", "").gsub('|','\|')
+  }
+  return "Nothing Found" if lines.size == 0
+  lines.each_with_index { |test, i|
+    puts "[#{i}] #{test.strip}" 
+  }
+  term = fix_label(lines[ask('[Enter Number]', f, terms).to_i].strip) 
+  "-n /.*#{term}.*/"
+end
+
+def test(f, terms, term="")
+  options=["t", "u", "c", "q"]
+  commands = ask_no_abort(
+    "[t:test_all][u:unit_test]" +
+    "[c:check][q:quit]",
+    f,
+    terms,
+    true
+  )
   puts "commands| #{commands}"
-  return unless commands
-  return unless commands.select{|x| ["v", "u", "q"].include?(x)}.size > 0 
+  return if !commands || commands.select{|x| options.include?(x)}.empty? 
   test(f, terms) if share_nothing(commands, options)
-  v = contains(commands, "v") ? "--verbose" : ""
+  v = contains(commands, "t") ? "--verbose" : ""
+
   if commands.include?("u")
-    terms = commands.select{|x| !options.include?(x)}
+    term = unit_test(commands, f, options)
+  end  
 
-    lines = File.read(f).split("\n").select{ |line|
-      line = line.strip
-      line.include?("test ") && line.include?("do") && !line.start_with?("#") &&
-      (text_has(terms, line) || terms.size == 0) 
-    }.map{ |test|
-      test.gsub("test","").gsub("\"","").gsub("do", "").gsub('|','\|')
-    }
-
-    return "Nothing Found" if lines.size == 0
-    lines.each_with_index { |test, i|
-      puts "[#{i}] #{test.strip}" 
-    }
-
-    term = fix_label(lines[ask('[Enter Number]', f, terms).to_i].strip) 
-    term = "-n /.*#{term}.*/"
+  if commands.include?("c")
+    survey_test f
+    return
   end
-  command =  "bundle exec ruby -I test #{f} #{term} #{v}"
+
+  command = "bundle exec ruby -I test #{f} #{term} #{v}"
   puts command.green
   system command
   test f, terms
@@ -327,7 +352,6 @@ def execute_files(files, mvc_keyword, terms, dir, i=0)
   end
 end
 
-
 def open_file(f)
   basename = format_into_mac(File.basename(f))
   system "open #{File.dirname(f)}/#{basename}"
@@ -380,76 +404,6 @@ def supply(file)
   abort "#{file} does not exist." if !File.exist?(file)
   file
 end
-
-def collect_yml(target, keyword)
-  require 'yaml'
-  fixtures = "test/fixtures"
-  hash = {}
-  Dir["#{fixtures}/**/*"].select{|x| x.end_with?(".yml")}.each do |file|
-    begin
-      hash[file] = YAML.load_file(file)
-    rescue
-    end
-  end
-
-  def there_it_is(hash, keyword, target, target_slip)
-    hash.each do |key, value|
-      begin
-        if File.basename(key).start_with?(target)
-          value.each do |v|
-            target_slip = v if v[0].include?(keyword)
-          end
-          if target_slipt.size == 0
-            puts "none found".red
-          end
-        end  
-      rescue
-      end
-    end    
-    target_slip
-  end
-
-  target_slip = there_it_is hash, keyword, target , {}
-  abort "none found." if target_slip.size == 0
-  
-  def aaa(hash, head, blob, a="  ")
-    begin
-      blob.each do |b|
-        b.each do |bb|
-          puts "#{a}#{bb}".to_s.yellow
-          tiny_target = there_it_is(hash, "#{bb[1]}",  "#{bb[0]}", {})
-          if tiny_target.size > 0
-            puts "#{a}" + tiny_target[0].to_s.magenta
-            puts "#{a}" + tiny_target[1].to_s.green
-            #aaa(hash, tiny_target[0], tiny_target[1], "#{a}")
-          end
-        end
-      end
-      hash
-    rescue  
-    end  
-  end
-
-  target_key = target_slip[0]
-  puts target_key.cyan
-  aaa(hash, target_key, target_slip[1..target_slip.size-1])
-#  target_slip[1..target_slip.size-1].each do |k|
-#    k.each do |kk|
-#      puts kk.to_s.yellow
-#      tiny_target = there_it_is(hash, "#{kk[1]}",  "#{kk[0]}", {})
-#      if tiny_target.size > 0
-#        puts "  "+tiny_target[0].to_s.magenta
-#        puts "  " +tiny_target[1].to_s.green
-#      end
-#    end
-#  end
-
-  hash.each do |key, value|
-      
-  end
-end
-
-
 
 def operate_wiki
   system "mkdir -p #{WIKIDIR}"
