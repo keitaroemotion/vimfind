@@ -269,6 +269,7 @@ def test(f, terms, term="")
   command = "bundle exec ruby -I test #{f} #{term} #{v}"
   puts command.green
   system command
+  system "fplay /System/Library/Sounds/Glass.aiff"
   test f, terms
 end
 
