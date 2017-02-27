@@ -134,5 +134,6 @@ end
 
 show views, controllers, term
 
-
+puts "* ... #{"green".green} means the action has been defined both in view and controller"
+puts "* ... '+' means the action has been included in routes"
 puts
