@@ -1,4 +1,5 @@
 cp vf /usr/local/bin
+cp vv /usr/local/bin
 cp ymlook /usr/local/bin
 mkdir -p /usr/local/lib/vf
 cp lib/*.rb /usr/local/lib/vf
