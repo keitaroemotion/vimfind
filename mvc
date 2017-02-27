@@ -36,7 +36,7 @@ end
 
 model = models[0]
 term = File.basename(model).gsub(".rb","")
-
+puts
 puts "#{term.magenta} #{model}"
 
 controllers = filter(controller, ["#{term}s"], "*_controller\.rb")
@@ -93,15 +93,25 @@ def show(x, y)
       puts v.red
     end
   end
+
+  smaller.each do |s|
+    if !bigger.include?(s)
+      print "--> "
+      puts s.red
+    end
+  end
 end
 
 show views, controllers
 
+
 File.open("config/routes.rb").to_a.select do |line|
-  line.include?(":#{term},")
+  line.include?(":#{term},") ||
+  line.include?(":#{term}s,")
 end.each do |x|
   puts x.strip
          .gsub("only","only".green)
          .gsub("resources","resources".green)
          .gsub("resource ","resource ".green)
 end
+puts
