@@ -1,0 +1,98 @@
+#!/usr/bin/env ruby
+
+require "colorize"
+
+terms = ARGV[0..-1]
+
+controller = "app/controllers"
+model      = "app/models"
+view       = "app/views"
+
+def filter(dir, terms, precise=nil)
+  Dir["#{dir}/**/*"].select do |file|
+    (terms.select do |term|
+      if precise
+        !Regexp.new("^#{term}#{precise}$").match(File.basename(file)).nil?
+      else
+        File.basename(file).include?(term) 
+      end  
+    end.size) == terms.size
+  end
+end
+
+models = filter(model, terms)
+
+if models.empty?
+  abort "no matches."
+end
+
+if models.size > 1 
+  models.each_with_index do |x, i|
+    puts "#{i}: #{x.green}"
+  end
+  print "[which one?:] "
+  models = [models[$stdin.gets.chomp.to_i]]
+end
+
+model = models[0]
+term = File.basename(model).gsub(".rb","")
+
+puts "#{term.magenta} #{model}"
+
+controllers = filter(controller, ["#{term}s"], "*_controller\.rb")
+
+if controllers.empty?
+  abort "controller missing."
+end
+
+def collect_publics(c)
+  lines = []
+  File.open(c, "r").to_a.each do |line|
+    if line.strip == "private"
+      return lines      
+    end
+    lines.push line
+  end
+  lines
+end
+
+controllers = controllers.map do |c|
+  puts "#{File.dirname(c).yellow}/#{File.basename(c).cyan}"
+  collect_publics(c).select do |line|
+    line.strip.start_with?("def ")
+  end.map do |line|
+    line.strip.gsub("def ", "").split(";")[0]
+  end.flatten
+end.flatten
+
+views = filter(view, ["#{term}s"], "")
+
+if views.empty?
+  abort "view missing."
+end
+
+views = views.map do |v|
+  puts "#{File.dirname(v).green}/#{File.basename(v).cyan}"
+  Dir["#{v}/**/*"].map do |file|
+    File.basename(file).gsub(".html.erb", "")
+  end.map do |x|
+    x
+  end
+end.flatten
+
+def show(x, y)
+  pair = x.size > y.size ? [x, y] : [y, x]
+  bigger = pair[0]
+  smaller = pair[1]
+
+  bigger.each do |v|
+    print "--> "
+    if smaller.include?(v)
+      puts v.green
+    else
+      puts v.red
+    end
+  end
+end
+
+show views, controllers
