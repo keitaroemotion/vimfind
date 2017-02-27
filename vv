@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+file = ARGV[0]
+
+unless File.exist?(file)
+  abort "fuck you."
+end
+
+cmd = File.open(file, "r").each.to_a.inject("vim ") do
+  |acc, x| "#{acc.chomp}#{x.chomp} "
+end 
+
+system "#{cmd}"
