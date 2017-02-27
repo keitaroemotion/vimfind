@@ -82,38 +82,57 @@ views = views.map do |v|
   end
 end.flatten
 
-def show(x, y)
+def routes(term)
+  File.open("config/routes.rb").to_a.select do |line|
+    line.include?(":#{term},") ||
+    line.include?(":#{term}s,")
+  end.map do |x|
+    x.strip
+     .gsub("only","only")
+     .gsub("resources","resources")
+     .gsub("resource ","resource ")
+     .gsub(" do", "")
+     .gsub("[","")
+     .gsub("]","")
+     .gsub(":","")
+     .strip
+     .split((/[\s,]/))
+  end.flatten.select do |x|
+     !["only", "resources", "#{term}s"].include?(x) &&
+     x != ""
+  end
+end  
+
+def routes?(x, r)
+  if r.include? x
+    "(+) #{x} "
+  else    
+    "( ) #{x}"
+  end
+end
+
+def show(x, y, term)
+  r = routes term
   pair = x.size > y.size ? [x, y] : [y, x]
   bigger = pair[0]
   smaller = pair[1]
 
   bigger.each do |v|
-    print "--> "
     if smaller.include?(v)
-      puts v.green
+      puts routes?(v, r).green
     else
-      puts v.red
+      puts routes?(v, r).red
     end
   end
 
   smaller.each do |s|
     if !bigger.include?(s)
-      print "--> "
-      puts s.red
+      puts routes?(s, r).red
     end
   end
 end
 
-show views, controllers
+show views, controllers, term
 
 
-File.open("config/routes.rb").to_a.select do |line|
-  line.include?(":#{term},") ||
-  line.include?(":#{term}s,")
-end.each do |x|
-  puts x.strip
-         .gsub("only","only".green)
-         .gsub("resources","resources".green)
-         .gsub("resource ","resource ".green)
-end
 puts
