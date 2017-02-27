@@ -96,3 +96,12 @@ def show(x, y)
 end
 
 show views, controllers
+
+File.open("config/routes.rb").to_a.select do |line|
+  line.include?(":#{term},")
+end.each do |x|
+  puts x.strip
+         .gsub("only","only".green)
+         .gsub("resources","resources".green)
+         .gsub("resource ","resource ".green)
+end
