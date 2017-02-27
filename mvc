@@ -74,7 +74,9 @@ end
 views = views.map do |v|
   puts "#{File.dirname(v).green}/#{File.basename(v).cyan}"
   Dir["#{v}/**/*"].map do |file|
-    File.basename(file).gsub(".html.erb", "")
+    File.basename(file)
+      .gsub(".html.erb", "")
+      .gsub(".xml.erb", "")
   end.map do |x|
     x
   end
