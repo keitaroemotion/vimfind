@@ -244,33 +244,39 @@ def unit_test(commands, f, options)
 end
 
 def test(f, terms, term="")
-  options=["t", "u", "c", "q"]
-  commands = ask_no_abort(
-    "[t:test_all][u:unit_test]" +
-    "[c:check][q:quit]",
-    f,
-    terms,
-    true
-  )
-  puts "commands| #{commands}"
-  return if !commands || commands.select{|x| options.include?(x)}.empty? 
-  test(f, terms) if share_nothing(commands, options)
-  v = contains(commands, "t") ? "--verbose" : ""
+  unless f.end_with?("_test.rb")
+    puts "Hey, this is not test file.".magenta
+    return 
+  end
 
-  if commands.include?("u")
-    term = unit_test(commands, f, options)
-  end  
+  v = "--verbose"
+  if term == ""
+    options=["t", "u", "c", "q"]
+    commands = ask_no_abort(
+      "[t:test_all][u:unit_test]" +
+      "[c:check][q:quit]",
+      f,
+      terms,
+      true
+    )
+    puts "commands| #{commands}"
+    return if !commands || commands.select{|x| options.include?(x)}.empty? 
+    test(f, terms) if share_nothing(commands, options)
+    v = contains(commands, "t") ? "--verbose" : ""
+    if commands.include?("u")
+      term = unit_test(commands, f, options)
+    end  
 
-  if commands.include?("c")
-    survey_test f
-    return
+    if commands.include?("c")
+      survey_test f
+      return
+    end  
   end
 
   command = "bundle exec ruby -I test #{f} #{term} #{v}"
   puts command.green
   system command
   system "fplay /System/Library/Sounds/Glass.aiff"
-  test f, terms
 end
 
 def format_into_mac(t)
@@ -337,7 +343,8 @@ def execute_file(dir, files, f, index, mvc_keyword, terms, next_flag=false)
     add_file_to_wiki(f)           if input == "a"
     display_matches(f, key_terms) if input == "w"
     collect_funcs(f)              if input == "l"
-    test(f, terms)                if input == "t"
+    test(f, terms, "t")                if input == "t"
+    test(f, terms, "t")           if input == "tt"
     open_https(f)                 if input == "u"
     system "git blame #{f}"       if input == "b"
     execute_files(sort(files, index), mvc_keyword, terms, dir) if input == "p"
