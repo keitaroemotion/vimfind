@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+
+require "colorize"
+
+option = $*[0]
+
+diff       = `git diff develop --name-only`
+files = diff.split("\n")
+
+puts diff.yellow
+
+puts "#{files.size} Files"
+puts
+
+case option 
+when "/"
+  system files.inject("vim"){ |acc, file| "#{acc} #{file}" } 
+when "help", "--h"
+  puts ""
+  puts "/         ... open files after reading it."
+  puts "help, --h ... help option"
+  puts ""
+end
+
