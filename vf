@@ -440,7 +440,7 @@ elsif ARGV[0] == ":wils"
 elsif ARGV[0] == "routes"  
   tail = " | grep #{ARGV[1]}" if ARGV[1]
   system "bin/rake routes#{tail}" 
-elsif ARGV[0] == "yml"  
+elsif ARGV[0] == "yml" 
   collect_yml ARGV[1], ARGV[2]
 else
   search_all(terms, directory, mvc_mode, mvc_keyword) 
