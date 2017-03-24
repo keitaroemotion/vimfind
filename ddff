@@ -13,6 +13,12 @@ puts "#{files.size} Files"
 puts
 
 case option 
+when "//"
+  files.each_with_index do |file, i|
+    puts "#{i}: #{file.green}"
+  end
+  print "\n[enter number: ] "
+  system "vim #{files[$stdin.gets.chomp.to_i]}"
 when "/"
   system files.inject("vim"){ |acc, file| "#{acc} #{file}" } 
 when "help", "--h"
