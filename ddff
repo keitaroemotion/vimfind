@@ -13,18 +13,29 @@ puts "#{files.size} Files"
 puts
 
 case option 
-when "//"
+when "/t"
+  files = files.select {|f| f.end_with?("_test.rb") }
+  files.each_with_index do |tfile, i|
+    puts "#{i}: #{tfile.green}"
+  end
+  print "\n[enter number: ] "
+  command = "bundle exec ruby -I test #{files[$stdin.gets.chomp.to_i]} --verbose"
+  puts "command: #{command}".green
+  system command
+when "/"
   files.each_with_index do |file, i|
     puts "#{i}: #{file.green}"
   end
   print "\n[enter number: ] "
   system "vim #{files[$stdin.gets.chomp.to_i]}"
-when "/"
+when "//"
   system files.inject("vim"){ |acc, file| "#{acc} #{file}" } 
-when "help", "--h"
+when "help", "-h", "--help"
   puts ""
-  puts "/         ... open files after reading it."
-  puts "help, --h ... help option"
+  puts "/t         ... test (ruby)"
+  puts "/         ... open a file after reading it."
+  puts "//         ... open all files after reading it."
+  puts "help, -h ... help option"
   puts ""
 end
 
