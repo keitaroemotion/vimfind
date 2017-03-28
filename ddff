@@ -12,14 +12,20 @@ puts diff.yellow
 puts "#{files.size} Files"
 puts
 
+def index
+  print "\n[enter number: ] "
+  choice = $stdin.gets.chomp
+  abort if choice.downcase == "q"
+  choice.to_i
+end
+
 case option 
 when "/t"
   files = files.select {|f| f.end_with?("_test.rb") }
   files.each_with_index do |tfile, i|
     puts "#{i}: #{tfile.green}"
   end
-  print "\n[enter number: ] "
-  command = "bundle exec ruby -I test #{files[$stdin.gets.chomp.to_i]} --verbose"
+  command = "bundle exec ruby -I test #{files[index]} --verbose"
   puts "command: #{command}".green
   system command
 when "/"
@@ -28,8 +34,7 @@ when "/"
   files.each_with_index do |file, i|
     puts "#{i}: #{file.green}"
   end
-  print "\n[enter number: ] "
-  system "vim #{files[$stdin.gets.chomp.to_i]}"
+  system "vim #{files[index.to_i]}"
 when "//"
   system files.inject("vim"){ |acc, file| "#{acc} #{file}" } 
 when "/r"  
