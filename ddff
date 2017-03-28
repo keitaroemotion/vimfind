@@ -23,6 +23,8 @@ when "/t"
   puts "command: #{command}".green
   system command
 when "/"
+  kw = $*[1]
+  files = files.select{|x| x.include?(kw) } if !kw.nil?
   files.each_with_index do |file, i|
     puts "#{i}: #{file.green}"
   end
@@ -30,9 +32,15 @@ when "/"
   system "vim #{files[$stdin.gets.chomp.to_i]}"
 when "//"
   system files.inject("vim"){ |acc, file| "#{acc} #{file}" } 
+when "/r"  
+  files.select{|f| f.end_with?(".rb")}.each do |file|
+    system "rubocop #{file}"
+    $stdin.gets.chomp
+  end
 when "help", "-h", "--help"
   puts ""
   puts "/t         ... test (ruby)"
+  puts "/r         ... rubocop"
   puts "/         ... open a file after reading it."
   puts "//         ... open all files after reading it."
   puts "help, -h ... help option"
