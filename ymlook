@@ -118,11 +118,19 @@ end
 case term
 when "/a"
   kw = ARGV[1]
+  pairs = []
+  i = 0
   get_fixture_and_key(kw).each do |filename, content|
+    pairs.push "test/fixtures/#{filename}.yml"
     content.each do |label|
-      puts "#{filename.green} | #{label.gsub(kw, kw.cyan)}"
+      puts "[#{i.to_s.magenta}] #{filename.green} | #{label.gsub(kw, kw.cyan)}"
     end
+    i = i + 1
   end
+  print "[which to open?] "
+  input = $stdin.gets.chomp
+  abort if input == "q" || input.empty?
+  system "vim #{pairs[input.to_i]}"
 when "a"
   @errors = []
   puts "\n!!|power search|!!\n".cyan
