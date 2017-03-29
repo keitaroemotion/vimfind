@@ -47,7 +47,6 @@ def count_pipe(t)
 end
 
 def look_up(fix_target, term, option, tab="  |", suspects=[], delegates=[])
-  abort "empty input." if ARGV.size < 3
   files_to_hash.each do |k, v|
     if k.start_with?(fix_target)
       result = v.keys.select{|key| key.strip == term.strip }
@@ -92,19 +91,65 @@ def w()
   write ""
 end
 
+def get_fixture_and_key(keyword)
+  if keyword.nil?
+    abort "keyword missing".red
+  end
+  Dir["test/fixtures/**/*.yml"].map do |file|
+    filename = File.basename(file).gsub(".yml","")
+    content  = File.open(file, "r").read.to_s.split("\n")
+    [filename, content]
+  end.select do |filename, content|
+    content.select do |line|
+      !/[a-z]/.match(line[0]).nil? &&
+      !line.empty? &&
+      line.include?(keyword)
+    end.size > 0
+  end.map do |filename, content|
+    [filename, content.select do |line|
+      !/[a-z]/.match(line[0]).nil? &&
+      line.include?(keyword)
+    end.map do |line|
+      line.gsub(":", "")
+    end]
+  end  
+end
 
 case term
+when "/a"
+  kw = ARGV[1]
+  get_fixture_and_key(kw).each do |filename, content|
+    content.each do |label|
+      puts "#{filename.green} | #{label.gsub(kw, kw.cyan)}"
+    end
+  end
+when "a"
+  @errors = []
+  puts "\n!!|power search|!!\n".cyan
+  get_fixture_and_key(ARGV[1]).each do |filename, content|
+    puts "#{filename.green} | #{content.size}"
+    content.each do |label|
+      puts label
+      look_up(filename, label, false).each {|x| @errors.add([filename, label, x])}
+    end
+  end
+  @errors.each do |filename, label, error|
+    puts "#{filename.green} #{label.cyan} #{error.red}"
+  end
 when "list"
   list
 when "/:"  
   w
+  abort "empty input." if ARGV.size < 3
   look_up(ARGV[1], ARGV[2], true).each {|x| puts x.red}
 when "/w"  
   w
+  abort "empty input." if ARGV.size < 3
   look_up(ARGV[1], ARGV[2], false).each {|x| puts x.red}
   system "vim #{LOG}"
 when "/"  
   w
+  abort "empty input." if ARGV.size < 3
   look_up(ARGV[1], ARGV[2], false).each {|x| puts x.red}
 else
   help
