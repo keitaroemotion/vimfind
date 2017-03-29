@@ -322,6 +322,13 @@ def add_file_to_wiki(f)
     system "echo #{f} >> #{WIKIDIR}/#{$stdin.gets.chomp}" 
 end
 
+def open_test(f)
+  test_name = File.basename(f).gsub(".rb","_test.rb")
+  Dir["**/#{test_name}"].each do |test_file|
+    system "vim #{test_file}"
+  end
+end
+
 def execute_file(dir, files, f, index, mvc_keyword, terms, next_flag=false)
   if (!mvc_keyword || file_open(f, "r").include?(mvc_keyword))
     file_path = replace(f, terms)
@@ -332,10 +339,12 @@ def execute_file(dir, files, f, index, mvc_keyword, terms, next_flag=false)
     puts "[l: list methods     ][d: db schema search    ]"
     puts "[t: execute test     ][f: file sort           ]"
     puts "[o: open file        ][a: add file to wiki    ]"
+    puts "[ct: open corresponding test with vim]".magenta
     puts "[r: rubocop search   ][b: blame               ]"
 
     print "[p:prev n:next] Enter: ".cyan
     input = $stdin.gets.chomp.downcase
+    open_test(f) if input == "ct"
     check_db(dir)                 if input == "d"
     system "vim #{format_into_mac(f)}"             if (input == "y" || input == "v")
     open_file(f)                  if input == "o"

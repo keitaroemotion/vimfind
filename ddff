@@ -39,8 +39,11 @@ when "//"
   system files.inject("vim"){ |acc, file| "#{acc} #{file}" } 
 when "/r"  
   files.select{|f| f.end_with?(".rb")}.each do |file|
-    system "rubocop #{file}"
-    $stdin.gets.chomp
+    p = `rubocop #{file}`
+    unless "#{p}".include? "no offense"
+      system "rubocop #{file}"
+      $stdin.gets.chomp
+    end
   end
 when "help", "-h", "--help"
   puts ""
