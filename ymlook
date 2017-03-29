@@ -115,12 +115,10 @@ def get_fixture_and_key(keyword)
   end  
 end
 
-case term
-when "/a"
-  kw = ARGV[1]
+def look_yml(data, kw)
   pairs = []
   i = 0
-  get_fixture_and_key(kw).each do |filename, content|
+  data.each do |filename, content|
     pairs.push "test/fixtures/#{filename}.yml"
     content.each do |label|
       puts "[#{i.to_s.magenta}] #{filename.green} | #{label.gsub(kw, kw.cyan)}"
@@ -130,7 +128,18 @@ when "/a"
   print "[which to open?] "
   input = $stdin.gets.chomp
   abort if input == "q" || input.empty?
-  system "vim #{pairs[input.to_i]}"
+  if !/[0-9]/.match(input.to_s).nil?
+    system "vim #{pairs[input.to_i]}"
+  else
+    look_yml(data.select do |filename, content|
+      filename.include? input
+    end, kw)
+  end
+end
+
+case term
+when "/a"
+  look_yml get_fixture_and_key(ARGV[1]), ARGV[1]
 when "a"
   @errors = []
   puts "\n!!|power search|!!\n".cyan
