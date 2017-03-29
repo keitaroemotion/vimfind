@@ -102,6 +102,10 @@ then, you type as follows:
 $ ymlook help
 `
 
+The following command can allow you to search all fixture-label pairs corresponding to the search term
+
+`$ymlook /a account`
+
 
 ===============
 Wiki Features
