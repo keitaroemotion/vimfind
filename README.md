@@ -103,9 +103,7 @@ The following command can allow you to search all fixture-label pairs correspond
 `$ymlook /a account`
 
 
-===============
-Wiki Features
-===============
+# Wiki Features
 
 vf supports local wiki management features.
 
