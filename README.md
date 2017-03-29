@@ -86,7 +86,7 @@ with highlighted results
 ymlook
 --------------
 
-ymlook is a powerful tool to search and vallidate the relations in your test/fixtures/ directory.
+ymlook is a powerful tool to search and validate the relations in your test/fixtures/ directory.
 
 `
 $ gem install inflector
