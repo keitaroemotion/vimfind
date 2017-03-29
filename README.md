@@ -1,6 +1,4 @@
-==============================
-vimfind
-==============================
+# vimfind
 
 Premise:
 
@@ -40,9 +38,7 @@ the following command allows you to grep and edit matching files:
 $ vf ?[keyword]
 `
 
-================
-For Rails Users
-================
+# For Rails Users
 
 If you are ruby user, you can find/grep through the [model/view/controller]
 
