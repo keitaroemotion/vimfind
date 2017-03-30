@@ -16,7 +16,7 @@ def index
   print "\n[enter number: ] "
   choice = $stdin.gets.chomp
   abort if choice.downcase == "q"
-  choice.to_i
+  choice
 end
 
 case option 
@@ -29,12 +29,19 @@ when "/t"
   puts "command: #{command}".green
   system command
 when "/"
-  kw = $*[1]
-  files = files.select{|x| x.include?(kw) } if !kw.nil?
-  files.each_with_index do |file, i|
-    puts "#{i}: #{file.green}"
+  def open_file(kw, files)
+    files = files.select{|x| x.include?(kw) } if !kw.nil?
+    files.each_with_index do |file, i|
+      puts "#{i}: #{file.green}"
+    end
+    i = index
+    if !/^[0-9]/.match(i).nil?
+      system "vim #{files[i.to_i]}"
+    else
+      open_file i, files
+    end
   end
-  system "vim #{files[index.to_i]}"
+  open_file $*[1], files
 when "//"
   system files.inject("vim"){ |acc, file| "#{acc} #{file}" } 
 when "/r"  
