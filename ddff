@@ -25,7 +25,7 @@ when "/t"
   files.each_with_index do |tfile, i|
     puts "#{i}: #{tfile.green}"
   end
-  command = "bundle exec ruby -I test #{files[index]} --verbose"
+  command = "bundle exec ruby -I test #{files[index.to_i]} --verbose"
   puts "command: #{command}".green
   system command
 when "/"
