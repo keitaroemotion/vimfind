@@ -13,7 +13,7 @@ puts "#{files.size} Files"
 puts
 
 def index
-  print "\n[enter number: ] "
+  print "\n[enter number: /all] "
   choice = $stdin.gets.chomp
   abort if choice.downcase == "q"
   choice
