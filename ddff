@@ -40,22 +40,23 @@ def fff(files)
   end  
 end
 
+def open_file(kw, files)
+  files = files.select{|x| x.include?(kw) } if !kw.nil?
+  files.each_with_index do |file, i|
+    puts "#{i}: #{file.green}"
+  end
+  i = index
+  if !/^[0-9]/.match(i).nil?
+    system "vim #{files[i.to_i]}"
+  else
+    open_file i, files
+  end
+end
+
 case option 
 when "/t"
   fff files
 when "/"
-  def open_file(kw, files)
-    files = files.select{|x| x.include?(kw) } if !kw.nil?
-    files.each_with_index do |file, i|
-      puts "#{i}: #{file.green}"
-    end
-    i = index
-    if !/^[0-9]/.match(i).nil?
-      system "vim #{files[i.to_i]}"
-    else
-      open_file i, files
-    end
-  end
   open_file $*[1], files
 when "//"
   system files.inject("vim"){ |acc, file| "#{acc} #{file}" } 
@@ -75,4 +76,6 @@ when "help", "-h", "--help"
   puts "//         ... open all files after reading it."
   puts "help, -h ... help option"
   puts ""
+else
+  open_file $*[1], files
 end
