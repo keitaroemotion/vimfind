@@ -54,13 +54,13 @@ def open_file(kw, files)
 end
 
 case option 
-when "/t"
+when "t"
   fff files
 when "/"
   open_file $*[1], files
 when "//"
   system files.inject("vim"){ |acc, file| "#{acc} #{file}" } 
-when "/r"  
+when "r"  
   files.select{|f| f.end_with?(".rb")}.each do |file|
     p = `rubocop #{file}`
     unless "#{p}".include? "no offense"
@@ -70,8 +70,8 @@ when "/r"
   end
 when "help", "-h", "--help"
   puts ""
-  puts "/t         ... test (ruby)"
-  puts "/r         ... rubocop"
+  puts "t         ... test (ruby)"
+  puts "r         ... rubocop"
   puts "/         ... open a file after reading it."
   puts "//         ... open all files after reading it."
   puts "help, -h ... help option"
