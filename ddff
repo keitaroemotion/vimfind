@@ -19,7 +19,7 @@ def index
   choice
 end
 
-def fff(files)
+def testare(files)
   files = files.select {|f| f.end_with?("_test.rb") }
   files.each_with_index do |tfile, i|
     puts "#{i}: #{tfile.green}"
@@ -32,7 +32,7 @@ def fff(files)
       system command
     end
   elsif !/[^0-9]/.match(i).nil?  
-    fff(files.select {|file| file.include?(i)})
+    testare(files.select {|file| file.include?(i)})
   else  
     command = "bundle exec ruby -I test #{files[i.to_i]} --verbose"
     puts "command: #{command}".green
@@ -55,7 +55,7 @@ end
 
 case option 
 when "t"
-  fff files
+  testare files
 when "/"
   open_file $*[1], files
 when "//"
