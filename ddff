@@ -53,6 +53,35 @@ def open_file(kw, files)
   end
 end
 
+def cleansing_target_line(line, count)
+  line = line.chomp
+  if line.end_with?(" ")
+    [line.rstrip, count + 1]
+  else
+    [line, count]
+  end
+end  
+
+def clean(files)
+  result = []
+  files.each do |file|
+    count = 0
+    clean_text =
+      File.open(file, "r").map do |line|
+        line, count = cleansing_target_line(line, count)
+        "#{line}\n"
+      end.inject(:+)
+
+    File.open(file, "w") do |f|
+      f.puts clean_text
+    end
+    result.push [file, count]
+  end
+  result.each do |file, count|
+    puts "#{file}: #{count.to_s.green}" if count > 0
+  end
+end
+
 case option 
 when "t"
   testare files
@@ -60,6 +89,8 @@ when "/"
   open_file $*[1], files
 when "//"
   system files.inject("vim"){ |acc, file| "#{acc} #{file}" } 
+when "c"  
+  clean files.select {|file| file.end_with?(".rb") } 
 when "r"  
   files.select{|f| f.end_with?(".rb")}.each do |file|
     p = `rubocop #{file}`
