@@ -12,6 +12,8 @@ puts diff.yellow
 puts "#{files.size} Files"
 puts
 
+$files_all = files.freeze
+
 def index
   print "\n[enter number: /all] "
   choice = $stdin.gets.chomp
@@ -67,6 +69,10 @@ end
 
 def open_file(kw, files)
   files = files.select{|x| x.include?(kw) } if !kw.nil?
+  if files.size == 0
+    puts "\nnon found\n".red
+    files = $files_all
+  end
   files.each_with_index do |file, i|
     puts "#{i}: #{file.green}"
   end
@@ -107,7 +113,6 @@ def clean(files)
   end
 end
 
-$files_all = files
 
 case option 
 when "t"
