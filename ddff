@@ -93,6 +93,20 @@ def cleansing_target_line(line, count)
   end
 end  
 
+def grep(files)
+  kw = ARGV[1]
+  if kw.nil?
+    print "[Enter Keyword: ] " 
+    kw = $stdin.gets.chomp
+  end
+  files.each do |file|
+    content = File.open(file, "r").each_line.to_a.join.downcase 
+    if content.include?(kw.downcase)
+      puts file.magenta
+    end
+  end
+end
+
 def clean(files)
   result = []
   files.each do |file|
@@ -115,6 +129,8 @@ end
 
 
 case option 
+when "g"
+  grep files
 when "t"
   testare files
 when "/"
@@ -134,6 +150,7 @@ when "r"
 when "help", "-h", "--help"
   puts ""
   puts "c         ... clean"
+  puts "g         ... grep"
   puts "t         ... test (ruby)"
   puts "r         ... rubocop"
   puts "/         ... open a file after reading it."
