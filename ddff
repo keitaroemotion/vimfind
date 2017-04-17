@@ -77,7 +77,7 @@ def open_file(kw, files)
     puts "#{i}: #{file.green}"
   end
   i = index
-  if !/^[0-9]/.match(i).nil?
+  if !/^[0-9]/.match(i).nil? || files.size == 1
     system "vim #{files[i.to_i]}"
   else
     open_file i, files
