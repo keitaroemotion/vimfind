@@ -19,13 +19,36 @@ def index
   choice
 end
 
+$recollection_dir = "/usr/local/etc/ddff"
+
+def recollect_last_test(test_file)
+  system "mkdir -p #{$recollection_dir}"
+  system "echo #{test_file} > #{$recollection_dir}/recollection" 
+end
+
 def testare(files)
   files = files.select {|f| f.end_with?("_test.rb") }
+  if files.size == 0
+    puts "\n0 files found\n".red
+    files = $files_all 
+  end  
+
+  if files.size == 1
+    command = "bundle exec ruby -I test #{files[0]} --verbose"
+    puts "command: #{command}".green
+    recollect_last_test(files[0])
+    system command
+    abort
+  end
+
   files.each_with_index do |tfile, i|
     puts "#{i}: #{tfile.green}"
   end
   i = index
-  if i.nil? || i == "all"
+  if i == ""
+    p = `cat #{$recollection_dir}/recollection`
+    testare [p.to_s.strip]
+  elsif i == "all"
     files.each do |file|
       command = "bundle exec ruby -I test #{file} --verbose"
       puts "command: #{command}".green
@@ -34,8 +57,10 @@ def testare(files)
   elsif !/[^0-9]/.match(i).nil?  
     testare(files.select {|file| file.include?(i)})
   else  
-    command = "bundle exec ruby -I test #{files[i.to_i]} --verbose"
+    file = files[i.to_i]
+    command = "bundle exec ruby -I test #{file} --verbose"
     puts "command: #{command}".green
+    recollect_last_test(file)
     system command
   end  
 end
@@ -82,6 +107,8 @@ def clean(files)
   end
 end
 
+$files_all = files
+
 case option 
 when "t"
   testare files
@@ -101,6 +128,7 @@ when "r"
   end
 when "help", "-h", "--help"
   puts ""
+  puts "c         ... clean"
   puts "t         ... test (ruby)"
   puts "r         ... rubocop"
   puts "/         ... open a file after reading it."
