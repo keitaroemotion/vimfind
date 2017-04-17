@@ -162,15 +162,26 @@ def transfer(targets, branch)
   end
 end
 
+def get_large_files(files, branch, kw)
+  puts "git diff --name-only #{branch}".green
+  files = `git diff --name-only #{branch}`.split("\n").map do |file|
+    file.strip 
+  end
+  files = files.select {|x| x.include?(kw)} if kw
+  files
+end
+
 def sync(files, kw = nil, branch = nil)
-  branch = find_branch(files) if branch.nil?
-  files = files.select {|x| x.include?(lw)} if kw
+  branch = find_branch(files).gsub("*", "").strip if branch.nil?
+  files = get_large_files(files, branch, kw)
   files.each_with_index do |file, i|
    puts "#{i.to_s.magenta} #{file}"
   end
   print "Select files[ex. 0 2 3 4/all]: "
   i = $stdin.gets.chomp
-  if i.nil?
+  if i == "q"
+    return
+  elsif i.nil?
     return sync files, i, branch
   elsif i == "all"
    transfer(files, branch)
