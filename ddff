@@ -57,7 +57,7 @@ def testare(files)
       system command
     end
   elsif !/[^0-9]/.match(i).nil?  
-    testare(files.select {|file| file.include?(i)})
+    testare(files.select {|file| has?(file, i)})
   else  
     file = files[i.to_i]
     command = "bundle exec ruby -I test #{file} --verbose"
@@ -67,8 +67,13 @@ def testare(files)
   end  
 end
 
-def open_file(kw, files)
-  files = files.select{|x| x.include?(kw) } if !kw.nil?
+def has?(x, kws)
+  kws = kws.split(" ")
+  kws.select{|kw| x.include?(kw)}.size == kws.size
+end
+
+def open_file(kws, files)
+  files = files.select{|x| has?(x, kws) } if !kws.nil?
   if files.size == 0
     puts "\nnon found\n".red
     files = $files_all
@@ -163,11 +168,14 @@ def transfer(targets, branch)
 end
 
 def get_large_files(files, branch, kw)
-  puts "git diff --name-only #{branch}".green
-  files = `git diff --name-only #{branch}`.split("\n").map do |file|
-    file.strip 
-  end
-  files = files.select {|x| x.include?(kw)} if kw
+  if !kw
+    puts "git diff --name-only #{branch}".green
+    files = `git diff --name-only #{branch}`.split("\n").map do |file|
+      file.strip 
+    end
+    kw = ""
+  end  
+  files = files.select {|x| x.include?(kw)}
   files
 end
 
@@ -185,8 +193,8 @@ def sync(files, kw = nil, branch = nil)
     return sync files, i, branch
   elsif i == "all"
    transfer(files, branch)
-  elsif /[^0-9\ ]/.match(i)
-    return sync(files.select{|x| x.include?(i)}, kw, branch)
+  elsif !/[^0-9\ ]/.match(i).nil?
+    return sync(files, i, branch)
   else
    targets = i.split(" ").map{|x| files[x.to_i]}
    transfer(targets, branch)
