@@ -73,14 +73,16 @@ def has?(x, kws)
 end
 
 def open_file(kws, files)
+  alert = ""
   files = files.select{|x| has?(x, kws) } if !kws.nil?
   if files.size == 0
-    puts "\nnon found\n".red
+    alert = "\n\nnon found\n\n".red
     files = $files_all
   end
   files.each_with_index do |file, i|
     puts "#{i}: #{file.green}"
   end
+  print alert
   i = index
   if !/^[0-9]/.match(i).nil? || files.size == 1
     system "vim #{files[i.to_i]}"
