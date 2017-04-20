@@ -68,7 +68,10 @@ end
 
 def has?(x, kws)
   kws = kws.split(" ")
-  kws.select{|kw| x.include?(kw)}.size == kws.size
+  negs = kws.select {|kw| kw.start_with?("!") }.map{|kw| kw.gsub("!", "")}
+  kws = kws.select {|kw| !kw.start_with?("!") }
+  kws.select{|kw| x.include?(kw)}.size == kws.size && \
+    negs.select{|kw| x.include?(kw)}.size == 0
 end
 
 def extra_option(opt)
