@@ -15,10 +15,10 @@ puts
 $files_all = files.freeze
 
 def index
-  print "\n[enter number: /all] "
+  print "\n[enter number: /all :t :e] "
   choice = $stdin.gets.chomp
   abort if choice.downcase == "q"
-  choice
+  choice.strip
 end
 
 $recollection_dir = "/usr/local/etc/ddff"
@@ -47,6 +47,7 @@ def testare(files)
     puts "#{i}: #{tfile.green}"
   end
   i = index
+  return if extra_option_2(i)
   if i == ""
     p = `cat #{$recollection_dir}/recollection`
     testare [p.to_s.strip]
@@ -72,8 +73,32 @@ def has?(x, kws)
   kws.select{|kw| x.include?(kw)}.size == kws.size
 end
 
+def extra_option(opt)
+  opt = opt.strip
+  if opt == ":t"
+    testare $files_all
+    return true
+  elsif opt == ":e"
+    puts "\nyou are already in the edit mode\n".magenta
+    return false
+  end
+end    
+
+def extra_option_2(opt)
+  opt = opt.strip
+  if opt == ":e"
+    open_file "",  $files_all
+    return true
+  elsif opt == ":t"
+    puts "\nyou are already in the test mode\n".magenta
+    return false
+  end
+end    
+
+
 def open_file(kws, files)
   alert = ""
+  return if extra_option(kws)
   files = files.select{|x| has?(x, kws) } if !kws.nil?
   if files.size == 0
     alert = "\n\nnon found\n\n".red
@@ -84,6 +109,7 @@ def open_file(kws, files)
   end
   print alert
   i = index
+  return if extra_option(i)
   if !/^[0-9]/.match(i).nil? || files.size == 1
     system "vim #{files[i.to_i]}"
   else
