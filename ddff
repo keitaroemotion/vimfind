@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require "colorize"
+require "/usr/local/lib/vf/util.rb"
 
 option = $*[0]
 
@@ -25,8 +26,12 @@ def recollect_last_test(test_file)
   system "echo #{test_file} > #{$recollection_dir}/recollection" 
 end
 
+def filter_tail(array, text)
+  array.select {|member| member.end_with?(text) }
+end
+
 def testare(files, kw = "")
-  files = files.select {|f| f.end_with?("_test.rb") }
+  files = filter_tail(files, "_test.rb")
   if files.size == 0
     puts "\n0 files found\n".red
     files = $files_all 
@@ -42,7 +47,7 @@ def testare(files, kw = "")
 
   puts
   files.each_with_index do |tfile, i|
-    puts "#{i}: #{gsubs(tfile, kw)}"
+    puts "#{i}: #{Util.gsubs(tfile, kw)}"
   end
   i = index
   return if extra_option_2(i)
@@ -96,14 +101,6 @@ def extra_option_2(opt)
   end
 end    
 
-
-def gsubs(x, kws)
-  kws.split(" ").each do |kw|
-    x = x.gsub(kw, kw.green)
-  end
-  x
-end
-
 def open_file(kws, files)
   alert = ""
   return if extra_option(kws)
@@ -113,7 +110,7 @@ def open_file(kws, files)
     files = $files_all
   end
   files.each_with_index do |file, i|
-    puts "#{i.to_s.cyan}: #{gsubs(file, kws)}"
+    puts "#{i.to_s.cyan}: #{Util.gsubs(file, kws)}"
   end
   print alert
   i = index
