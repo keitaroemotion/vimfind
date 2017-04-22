@@ -26,12 +26,8 @@ def recollect_last_test(test_file)
   system "echo #{test_file} > #{$recollection_dir}/recollection" 
 end
 
-def filter_tail(array, text)
-  array.select {|member| member.end_with?(text) }
-end
-
 def testare(files, kw = "")
-  files = filter_tail(files, "_test.rb")
+  files = Util.filter_tail(files, "_test.rb")
   if files.size == 0
     puts "\n0 files found\n".red
     files = $files_all 
@@ -61,7 +57,7 @@ def testare(files, kw = "")
       system command
     end
   elsif !/[^0-9]/.match(i).nil?  
-    testare(files.select {|file| has?(file, i)}, i)
+    testare(files.select {|file| Util.has?(file, i)}, i)
   else  
     file = files[i.to_i]
     command = "bundle exec ruby -I test #{file} --verbose"
@@ -69,14 +65,6 @@ def testare(files, kw = "")
     recollect_last_test(file)
     system command
   end  
-end
-
-def has?(x, kws)
-  kws = kws.split(" ")
-  negs = kws.select {|kw| kw.start_with?("!") }.map{|kw| kw.gsub("!", "")}
-  kws = kws.select {|kw| !kw.start_with?("!") }
-  kws.select{|kw| x.include?(kw)}.size == kws.size && \
-    negs.select{|kw| x.include?(kw)}.size == 0
 end
 
 def extra_option(opt)
@@ -104,7 +92,7 @@ end
 def open_file(kws, files)
   alert = ""
   return if extra_option(kws)
-  files = files.select{|x| has?(x, kws) } if !kws.nil?
+  files = files.select{|x| Util.has?(x, kws) } if !kws.nil?
   if files.size == 0
     alert = "\n\nnon found\n\n".red
     files = $files_all
