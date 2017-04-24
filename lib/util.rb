@@ -1,4 +1,18 @@
 class Util
+  def self.grep(files)
+    kw = ARGV[1]
+    if kw.nil?
+      print "[Enter Keyword: ] " 
+      kw = $stdin.gets.chomp
+    end
+    files.each do |file|
+      content = File.open(file, "r").each_line.to_a.join.downcase 
+      if content.include?(kw.downcase)
+        puts file.magenta
+      end
+    end
+  end
+
   def self.gsubs(text, keywords)
     keywords.split(" ").each do |keyword|
       text = text.gsub(keyword, keyword.green)
