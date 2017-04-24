@@ -27,8 +27,8 @@ class Test
     files.each_with_index do |tfile, i|
       puts "#{i}: #{Util.gsubs(tfile, kw)}"
     end
-    i = index
-    return if extra_option_2(i)
+    i = Util.index
+    return if Util.extra_option_2(i)
     if i == ""
       p = `cat #{$recollection_dir}/recollection`
       testare [p.to_s.strip]

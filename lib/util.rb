@@ -1,4 +1,83 @@
 class Util
+  def self.open_file(kws, files)
+    alert = ""
+    return if extra_option(kws)
+    files = files.select{|x| Util.has?(x, kws) } if !kws.nil?
+    if files.size == 0
+      alert = "\n\nnon found\n\n".red
+      files = $files_all
+    end
+    files.each_with_index do |file, i|
+      puts "#{i.to_s.cyan}: #{Util.gsubs(file, kws)}"
+    end
+    print alert
+    i = Util.index
+    return if extra_option(i)
+    if !/^[0-9]/.match(i).nil? || files.size == 1
+      system "vim #{files[i.to_i]}"
+    else
+      open_file i, files
+    end
+  end
+
+  def self.cleansing_target_line(line, count)
+    line = line.chomp
+    if line.end_with?(" ")
+      [line.rstrip, count + 1]
+    else
+      [line, count]
+    end
+  end  
+
+  def self.clean(files)
+    result = []
+    files.each do |file|
+      count = 0
+      clean_text =
+        File.open(file, "r").map do |line|
+          line, count = cleansing_target_line(line, count)
+          "#{line}\n"
+        end.inject(:+)
+
+      File.open(file, "w") do |f|
+        f.puts clean_text
+      end
+      result.push [file, count]
+    end
+    result.each do |file, count|
+      puts "#{file}: #{count.to_s.green}" if count > 0
+    end
+  end
+
+  def self.extra_option(opt)
+    opt = opt.strip
+    if opt == ":t"
+      Test.testare $files_all
+      return true
+    elsif opt == ":e"
+      puts "\nyou are already in the edit mode\n".magenta
+      return false
+    end
+  end    
+
+  def self.extra_option_2(opt)
+    opt = opt.strip
+    if opt == ":e"
+      open_file "",  $files_all
+      return true
+    elsif opt == ":t"
+      puts "\nyou are already in the test mode\n".magenta
+      return false
+    end
+  end    
+
+  def self.index
+    print "\n[enter number: /all :t :e] "
+    choice = $stdin.gets.chomp
+    abort if choice.downcase == "q"
+    choice.strip
+  end
+
   def self.grep(files)
     kw = ARGV[1]
     if kw.nil?
