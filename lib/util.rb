@@ -7,12 +7,30 @@ class Util
       alert = "\n\nnon found\n\n".red
       files = $files_all
     end
-    files.each_with_index do |file, i|
+    (files || []).each_with_index do |file, i|
       puts "#{i.to_s.cyan}: #{Util.gsubs(file, kws)}"
     end
     print alert
     i = Util.index
     return if extra_option(i)
+    if i == ":d"
+      base_dir = []
+      dirs = files.select{|f| File.directory?(f)}
+      dirs.each_with_index do |dir, i|
+        if base_dir.select{|d| dir.include?(d) }.size > 0
+        else
+          print "[DIR #{i}] ".green
+          puts dir.magenta
+          base_dir.push dir
+        end  
+      end
+      print "[enter:] "
+      key = $stdin.gets.chomp
+      dir_con = Dir["#{dirs[key.to_i]}/**/*"]
+      abort "[BLANK]: #{dirs[key.to_i]}".red if dir_con.empty?
+      return open_file("", dir_con)
+    end
+    files ||= Dir["**/*"]
     if !/^[0-9]/.match(i).nil? || files.size == 1
       system "vim #{files[i.to_i]}"
     else
@@ -38,7 +56,6 @@ class Util
           line, count = cleansing_target_line(line, count)
           "#{line}\n"
         end.inject(:+)
-
       File.open(file, "w") do |f|
         f.puts clean_text
       end
@@ -72,24 +89,32 @@ class Util
   end    
 
   def self.index
-    print "\n[enter number: /all :t :e] "
+    print "\n[enter number: /all :t :e :d] "
     choice = $stdin.gets.chomp
     abort if choice.downcase == "q"
     choice.strip
   end
 
-  def self.grep(files)
-    kw = ARGV[1]
+  def self.grep(files, kw)
+    c = 0
     if kw.nil?
       print "[Enter Keyword: ] " 
       kw = $stdin.gets.chomp
     end
     files.each do |file|
-      content = File.open(file, "r").each_line.to_a.join.downcase 
-      if content.include?(kw.downcase)
-        puts file.magenta
-      end
+      if File.file?(file)
+        begin
+          content = File.open(file, "r").each_line.to_a.join.downcase 
+          if content.include?(kw.downcase)
+            print "[GREP] ".green
+            puts file.magenta
+            c = c+1
+          end
+        rescue
+        end
+      end  
     end
+    c
   end
 
   def self.gsubs(text, keywords)
@@ -104,7 +129,8 @@ class Util
   end
 
   def self.has?(x, kws)
-    kws = kws.split(" ")
+    x = x.downcase
+    kws = kws.split(" ").map{|y| y.downcase }
     negs = kws.select {|kw| kw.start_with?("!") }.map{|kw| kw.gsub("!", "")}
     kws = kws.select {|kw| !kw.start_with?("!") }
     kws.select{|kw| x.include?(kw)}.size == kws.size && \

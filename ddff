@@ -6,16 +6,25 @@ require "/usr/local/lib/vf/test.rb"
 require "/usr/local/lib/vf/sync.rb"
 
 option = $*[0]
-diff       = `git diff develop --name-only`
-files = diff.split("\n")
-puts "\n#{files.size.to_s.magenta} Files\n\n"
-$files_all = files.freeze
+files = []
+
+if option == "-a"
+  files = Dir["**/*"]
+else  
+  diff       = `git diff develop --name-only`
+  files = diff.split("\n")
+  puts "\n#{files.size.to_s.magenta} Files\n\n"
+  $files_all = files.freeze
+end  
 
 case option 
 when "sync"
   Sync.sync files
+when "-a"
+  Util.grep files, $*[1]
+  Util.open_file $*[1..-1].join(" "), files
 when "g"
-  Util.grep files
+  Util.grep files, ARGV[1]
 when "t"
   Test.testare files
 when "/"
