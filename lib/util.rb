@@ -39,19 +39,45 @@ class Util
   end
 
   def self.compare_methods(current_dir, method_name)
-    result = Dir["#{current_dir}/*"].map do |file|
+    result = Dir["#{current_dir}/**/*"].map do |file|
       if File.directory?(file)
-        compare_methods(file, method_name)
       else
         compare_methods_sub(file, method_name)
       end  
-    end
+    end.select {|x| x != nil}
 
-    result.flatten.select{|x| !x.nil?}
+    display(result, method_name, "")
+  end
+
+  def self.display(result, method_name, kws)
+    result = result.flatten.select{|x| !x.nil? }
       .map {|x| x.gsub("def #{method_name}", "def #{method_name.green}")}
-      .each do |x|
-        puts x
+      .uniq
+
+    result.each do |x|
+        if kws == ""
+          puts x
+        else
+          if kws.class == Array
+            kws = kws.join(" ")
+          end
+          kws = kws.strip 
+          filename = x.split("\n").first
+          kws = kws.include?(" ") ? kws.split(" ") : [kws]
+          if kws.select{|kw| x.include?(kw)}.size == kws.size
+            puts x
+          end
+        end  
       end
+
+    puts
+    print "[keyword:] "
+    input1 = $stdin.gets.chomp.downcase
+    if input1 == "q"
+      abort
+    else
+      display(result, method_name, input1) 
+    end  
   end
 
   def self.sc(line)
@@ -90,7 +116,7 @@ class Util
               sc(line).end_with?(" begin") || \
               sc(line).start_with?("unless ") || \
               sc(line).include?(" do ") || \
-              sc(line).include?(" do\n")
+              sc(line).end_with?(" do")
             ) && \
             !sw(line, method_name)
           )
@@ -105,7 +131,7 @@ class Util
           return nil 
        end
     end
-    return nil
+    return content
   end
 
   def self.cleansing_target_line(line, count)
