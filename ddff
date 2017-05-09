@@ -45,6 +45,8 @@ when "r"
   end
 when "help", "-h", "--help"
   puts ""
+  puts "-a        ... look around (grep + find)"
+  puts "-ld [keyword] ... compare a function among classes"
   puts "sync      ... sync files"
   puts "c         ... clean"
   puts "g         ... grep"

@@ -123,3 +123,9 @@ open urls in an article
 vf :wio term
 `
 
+--------------
+ddff
+--------------
+f -ld [keyword] ... this can allow you compare specific function across multiple files
+
+
