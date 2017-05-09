@@ -20,6 +20,8 @@ end
 case option 
 when "sync"
   Sync.sync files
+when "-ld"
+  Util.compare_methods(".", ARGV[1])  
 when "-a"
   Util.grep files, $*[1]
   Util.open_file $*[1..-1].join(" "), files

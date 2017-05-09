@@ -38,6 +38,76 @@ class Util
     end
   end
 
+  def self.compare_methods(current_dir, method_name)
+    result = Dir["#{current_dir}/*"].map do |file|
+      if File.directory?(file)
+        compare_methods(file, method_name)
+      else
+        compare_methods_sub(file, method_name)
+      end  
+    end
+
+    result.flatten.select{|x| !x.nil?}
+      .map {|x| x.gsub("def #{method_name}", "def #{method_name.green}")}
+      .each do |x|
+        puts x
+      end
+  end
+
+  def self.sc(line)
+    line.strip.chomp
+  rescue
+    ""
+  end
+
+  def self.sw(line, method_name)
+    key = "def #{method_name}"
+    line = line.strip
+    line == key || line.start_with?("#{key}\n") || line.start_with?("#{key}(")
+  end
+
+  def self.compare_methods_sub(file, method_name)
+    count_flag = false
+    defs = 0
+    content = "" 
+
+    return nil unless file.end_with?(".rb")
+
+    File.open(file, "r").to_a.each do |line|
+      begin 
+        if sw(line, method_name)
+          content = "\n[#{file.magenta}]\n" 
+          count_flag = true
+        end
+
+        if count_flag
+          content += line
+          if (
+            (
+              sc(line).start_with?("def") || \
+              sc(line).start_with?("if ") || \
+              sc(line).start_with?("begin ") || \
+              sc(line).end_with?(" begin") || \
+              sc(line).start_with?("unless ") || \
+              sc(line).include?(" do ") || \
+              sc(line).include?(" do\n")
+            ) && \
+            !sw(line, method_name)
+          )
+            defs += 1
+          elsif (sc(line).start_with?("end") && defs > 0)  
+            defs -= 1
+          elsif (sc(line).start_with?("end") && defs == 0) 
+            return content
+          end
+         end  
+       rescue
+          return nil 
+       end
+    end
+    return nil
+  end
+
   def self.cleansing_target_line(line, count)
     line = line.chomp
     if line.end_with?(" ")
@@ -101,8 +171,10 @@ class Util
       print "[Enter Keyword: ] " 
       kw = $stdin.gets.chomp
     end
-    files.each do |file|
-      if File.file?(file)
+    files
+      .select{|f| /(.png|.jpg|.gif|.log|.cache|.pdf|.xls|.exe|.ttf|.ico)/.match(f).nil? }
+      .select{|f| File.file?(f)}
+      .each do |file|
         begin
           content = File.open(file, "r").each_line.to_a.join.downcase 
           if content.include?(kw.downcase)
@@ -111,9 +183,10 @@ class Util
             c = c+1
           end
         rescue
+          puts "FAILED: #{file}".red   
         end
-      end  
     end
+    puts "\nFIN.\n".cyan
     c
   end
 
