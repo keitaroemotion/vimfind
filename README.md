@@ -1,4 +1,4 @@
-# vimfind/ymlook/ddff
+# vimfind / ymlook / ddff
 
 vimfind is a tool to make your unix life easier.
 This module is a bandwagon of terminal-based utilty.
