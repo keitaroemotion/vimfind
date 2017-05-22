@@ -34,9 +34,9 @@ Of course, you can combine the above two.
 $ ddff [keyword]
 ```
 
-then it enlist the result of `git diff --name-only develop` (and if you put in keyword, the result is gonna be filtered according to it)
+then it enlists the result of `git diff --name-only develop` (and if you put in keyword, the result is gonna be filtered according to it)
 
-the merit of this is you do not need to fuck around with large amount of files yet just focusing on the files you have altered in your branch.
+the merit of this is you do not need to waste time inspecting the large amount of files yet just focusing on the files you have altered in your branch.
 
 
 ```
@@ -54,10 +54,19 @@ this option can allow you to pick files from another branch, which is not yet me
 
 ## ymlook
 
-This script is mainly created for reducing the cost of fucking around with rails yaml fixture relation verbose. ymlook is the powerful tool to find the inconsistent part in `test/fixtures` *automatically*.
+This script is mainly created for reducing the cost of looking through rails yaml fixture relation verbose. ymlook is the powerful tool to find the inconsistent part in `test/fixtures` *automatically*.
 
 ```
 $ ymlook
 ```
 
 For detail, please check the console output.
+
+If you have any questions, please contact me:
+
+tobasojyo@gmail.com
+
+
+# Donation
+
+If you are really generous guy helping me continue this project, please donate me. The way to donate is check out iTunes or Amazon and search "keita roimo" and buy one of my Albums. Thank you. Yay! 
