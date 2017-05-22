@@ -1,131 +1,25 @@
 # vimfind
 
-Premise:
+vimfind is a tool to make your unix life easier.
 
-Following command has to be available
+```
+$ cd vimfind
+$ install
+$ bundle install
+```
 
-`
-$ vim
-`
+To look in the current directory for the file with keywords,
 
-`
-$ git
-`
+```
+$ vf [keyword1] [keyword2]
+```
 
-This is a script to enable you to easily edit your files in a directory without going into the nest subdirectories.
+If you add ? as prefix, it can grep through the file content.
+```
+$vf ?[keyword]
+```
 
-vf stands for vimfind.
+Of course, you can combine the above two.
 
-`
-$ gem install colorize
-`
-
-First, you have to locate your vf script under the bin directory
-
-`
-$ cp vf /usr/local/bin/
-`
-
-then Go to the directory you are working:
-
-`
-$ vf [keyword]
-`
-
-the following command allows you to grep and edit matching files:
-
-`
-$ vf ?[keyword]
-`
-
-# For Rails Users
-
-If you are ruby user, you can find/grep through the [model/view/controller]
-
-List Files:
-
-`
-$ vf -mvc [@name] 
-`
-
-List Files Contains the keyword
-
-`
-$ vf -mvc [@name] ?[keyword]
-`
-
-You encounter with the following suggestion while searching:
-
-`
-app/models/sample.rb ? [y/q/w/p/l/d/t]
-`
-
-v ... Open the current file.
-
-q ... Quit Application
-
-w ... Show the lines matching your w:[keyword] query
-
-p ... Go to Previous Selection. 
-
-l ... List the Functions of the Current File.
-
-d ... Can easily access to your db schema.
-
-t ... Run Unit Test for the selected file
-
-r ... run rubocop for the target file
-
-a ... add current file name to wiki 
-
-You can access to the db schema by entering "d", and
-when you enter any keyword, the result would come up
-with highlighted results
-
---------------
-ymlook
---------------
-
-ymlook is a powerful tool to search and validate the relations in your test/fixtures/ directory.
-
-`
-$ gem install inflector
-`
-
-then, you type as follows:
-
-`
-$ ymlook help
-`
-
-The following command can allow you to search all fixture-label pairs corresponding to the search term
-
-`$ymlook /a account`
-
-
-# Wiki Features
-
-vf supports local wiki management features.
-
-enlist the current articles
-`
-vf :wi
-`
-
-add article
-`
-vf :wi [term]
-`
-
-open urls in an article
-
-`
-vf :wio term
-`
-
---------------
-ddff
---------------
-f -ld [keyword] ... this can allow you compare specific function across multiple files
 
 
