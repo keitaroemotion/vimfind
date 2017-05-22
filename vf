@@ -4,13 +4,13 @@ require "/usr/local/lib/vf/vim_find.rb"
 
 vf = VimFind.new(ARGV)
 
-vf.open(ARGV[1], WIKIDIR) if ARGV[0] == ":wio"
+vf.open(vf.first_arg, WIKIDIR) if vf.option == ":wio"
 
 case vf.option
 when "-w"
   vf.operate_wiki 
 when "-wl"  
-  vf.enlist_wiki(WIKIDIR, ARGV[1])
+  vf.enlist_wiki(WIKIDIR, vf.first_arg)
 when "-h", "--help"  
   puts "[keywords]: search files"
   puts "-w        : oprate local wiki"

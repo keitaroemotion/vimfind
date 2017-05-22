@@ -19,6 +19,10 @@ class VimFind
     @params[0]
   end
 
+  def first_arg
+    @params[1]
+  end
+
   def disp_instruction() abort "\nyou need argument.\n".red end
 
   def add_test(arr)
