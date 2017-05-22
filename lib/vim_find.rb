@@ -355,7 +355,6 @@ class VimFind
       puts "dir:  [#{replace(File.dirname(f), terms)}]"
       puts "file: [#{replace(File.basename(f), terms)}] ?"
       puts "[v: open with vim    ][q: quit                ]".cyan
-      puts "[w: show grep result ][s: search another file ]"
       puts "[l: list methods     ][d: db schema search    ]"
       puts "[t: execute test     ][f: file sort           ]"
       puts "[o: open file        ][a: add file to wiki    ]"
@@ -372,7 +371,6 @@ class VimFind
       open_file(f)                  if input == "o"
       system "rubocop #{f}"         if input == "r"
       add_file_to_wiki(f)           if input == "a"
-      display_matches(f, key_terms) if input == "w"
       collect_funcs(f)              if input == "l"
       test(f, terms, "t")                if input == "t"
       test(f, terms, "t")           if input == "tt"
