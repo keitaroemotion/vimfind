@@ -7,6 +7,12 @@ This module is a bandwagon of terminal-based utilty.
 - *ddff* is almost similar to vimfind yet it mainly targets diff to the develop branch.
 - *ymlook* is a yaml parser and analyzer(esp. for detecting dependency inconsistency in yaml fixture in rails)
 
+## requirement
+
+- vim is available on terminal
+- you are fed up with current verbose access to large amount of files on terminal
+- you are not Windows User aka asshole. (joke)
+
 ## vimfind
 
 ```
