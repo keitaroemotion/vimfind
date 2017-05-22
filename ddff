@@ -11,7 +11,8 @@ files = []
 if option == "-a"
   files = Dir["**/*"]
 else  
-  diff       = `git diff develop --name-only`
+  target = !option.nil? && option.start_with?(":") ? option[1..-1] : "develop"
+  diff       = `git diff #{target} --name-only`
   files = diff.split("\n")
   puts "\n#{files.size.to_s.magenta} Files\n\n"
   $files_all = files.freeze

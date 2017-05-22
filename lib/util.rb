@@ -50,6 +50,10 @@ class Util
   end
 
   def self.display(result, method_name, kws)
+    if method_name.nil?
+      abort "\nyou need argument\n".red
+    end
+
     result = result.flatten.select{|x| !x.nil? }
       .map {|x| x.gsub("def #{method_name}", "def #{method_name.green}")}
       .uniq
