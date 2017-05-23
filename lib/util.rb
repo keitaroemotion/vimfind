@@ -13,6 +13,9 @@ class Util
     print alert
     i = Util.index
     return if extra_option(i)
+    if i == ":c"
+      system "echo \"#{files.join("\n")}\" | pbcopy"
+    end
     if i == ":d"
       base_dir = []
       dirs = files.select{|f| File.directory?(f)}
@@ -189,7 +192,7 @@ class Util
   end    
 
   def self.index
-    print "\n[enter number: /all :t :e :d] "
+    print "\n[enter number: /all :t :e :d :c] "
     choice = $stdin.gets.chomp
     abort if choice.downcase == "q"
     choice.strip
