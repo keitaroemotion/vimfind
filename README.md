@@ -62,6 +62,13 @@ $ ddff sync
 ```
 this option can allow you to pick files from another branch, which is not yet merged.
 
+[Unstable] If you are Mac OSX user,
+
+```
+[enter number: /all ... :c] :c
+```
+
+This option might allow you to copy the result of file list to the clipboard
 
 ## ymlook
 
