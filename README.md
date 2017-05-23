@@ -34,6 +34,11 @@ $ vf ?[keyword]
 
 Of course, you can combine the above two.
 
+```
+$ vf -a [file path]
+```
+This command can edit a new file with directory/subdirectory automatically created
+
 ## ddff
 
 ```

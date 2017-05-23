@@ -7,15 +7,21 @@ vf = VimFind.new(ARGV)
 vf.open(vf.first_arg, WIKIDIR) if vf.option == ":wio"
 
 case vf.option
+when "-a"
+  system "mkdir -p #{File.dirname(vf.first_arg)}"
+  system "vim #{vf.first_arg}"
 when "-w"
   vf.operate_wiki 
 when "-wl"  
   vf.enlist_wiki(WIKIDIR, vf.first_arg)
 when "-h", "--help"  
+  puts
   puts "[keywords]: search files"
+  puts "-a [file] : add and edit file(subdirs automatically added)"
   puts "-w        : oprate local wiki"
   puts "-wl       : enlist local wiki"
   puts "-h        : show help"
+  puts
 else
   vf.search_all
 end
