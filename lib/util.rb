@@ -33,11 +33,38 @@ class Util
       abort "[BLANK]: #{dirs[key.to_i]}".red if dir_con.empty?
       return open_file("", dir_con)
     end
+    if i == ":o"
+      check_order(files, files)
+      return
+    end
     files ||= Dir["**/*"]
-    if !/^[0-9]/.match(i).nil? || files.size == 1
+    if num?(i) || files.size == 1
       system "vim #{files[i.to_i]}"
     else
       open_file i, files
+    end
+  end
+
+  def self.num?(i)
+    !/^[0-9]/.match(i).nil?
+  end
+
+  def self.check_order(files, ofiles)
+    print "[enter number: ] ".magenta
+    i = $stdin.gets.chomp
+    files = files.select{|x| x.include?(i) }
+    files = ofiles if files.size == 0
+    files.each_with_index do |file, idx|
+      puts "[#{idx.to_s.yellow}]: #{file.gsub(i.to_s, i.to_s.green)}"
+    end
+    if num?(i) || files.size == 1
+      File.open("#{files[i.to_i]}", "r").each_line.to_a.select do |line|
+        line.strip.start_with?("def ") || line.strip.start_with?("test ")
+      end.each do |line|
+        puts line.strip.chomp.cyan
+      end
+    else
+      return check_order(files, ofiles)
     end
   end
 
@@ -192,7 +219,7 @@ class Util
   end    
 
   def self.index
-    print "\n[enter number: /all :t :e :d :c] "
+    print "\n[enter number: /all :t :e :d :c :o] "
     choice = $stdin.gets.chomp
     abort if choice.downcase == "q"
     choice.strip
