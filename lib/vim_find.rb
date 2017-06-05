@@ -15,6 +15,44 @@ class VimFind
     @mvc_mode = mvc_mode
   end
 
+  def virtual_path
+    "/usr/local/etc/vf/virtual_branch"
+  end
+
+  def virtual_branch
+    system "mkdir -p /usr/local/etc/vf"
+    system "touch #{virtual_path}" unless File.exist?(virtual_path)
+    File.open(virtual_path, "r").to_a.first.strip
+  rescue
+    puts "\nyou need to set virtual branch\n\n".green
+    set_virtual
+  end
+
+  def virtual_files
+    `git diff --name-only #{virtual_branch}`.split("\n").map do |file|
+      "#{file} #{virtual_branch}"
+    end
+  end
+
+  def set_virtual
+    p = `git branch`.split("\n")
+    p.each_with_index do |branch, i|
+      puts "[#{i}] #{branch}"
+    end
+    print "[number:] "
+    branch = p[$stdin.gets.chomp.to_i]
+    system "mkdir -p /usr/local/etc/vf"
+    system "echo #{branch} > #{virtual_path}"
+    print "[Your Current Virtual Branch is: ] ".green
+    system "cat #{virtual_path}" 
+  end
+
+  def refer(file)
+    command = "git show #{virtual_branch}:#{file}"
+    puts command.green
+    system command
+  end
+
   def option
     @params[0]
   end
@@ -97,7 +135,12 @@ class VimFind
   end
 
   def list_files(dir, terms, mvc)
-    Dir.glob(dir).select{|file| includes(file, terms) }
+    files = Dir.glob(dir)
+    is_virtual = true
+    if is_virtual
+      files += virtual_files
+    end
+    files.select{|file| includes(file, terms) }
   end
 
   def display_matches(f, terms)
@@ -349,17 +392,27 @@ class VimFind
     end
   end
 
+  def show_file_name(f, terms)
+    file = replace(File.basename(f), terms).split(" ")
+    file.push ""
+    if file[1] != ""
+      file[1] += ": "
+    end
+    puts "file: [#{file[1].yellow}#{file.first}] ?"
+  end
+
   def execute_file(dir, files, f, index, mvc_keyword, terms, next_flag=false)
     if (!mvc_keyword || file_open(f, "r").include?(mvc_keyword))
       file_path = replace(f, terms)
       puts "dir:  [#{replace(File.dirname(f), terms)}]"
-      puts "file: [#{replace(File.basename(f), terms)}] ?"
+      show_file_name(f, terms)
       puts "[v: open with vim    ][q: quit                ]".cyan
       puts "[l: list methods     ][d: db schema search    ]"
       puts "[t: execute test     ][f: file sort           ]"
       puts "[o: open file        ][a: add file to wiki    ]"
       puts "[ct: open corresponding test with vim]".yellow
       puts "[ce: execute corresponding test]".magenta
+      puts "[vb: virtual branch reference]"
       puts "[r: rubocop search   ][b: blame               ]"
 
       print "[p:prev n:next] Enter: ".cyan
@@ -369,6 +422,7 @@ class VimFind
       check_db(dir)                 if input == "d"
       system "vim #{format_into_mac(f)}"             if (input == "y" || input == "v")
       open_file(f)                  if input == "o"
+      refer(f)                      if input == "vb" 
       system "rubocop #{f}"         if input == "r"
       add_file_to_wiki(f)           if input == "a"
       collect_funcs(f)              if input == "l"

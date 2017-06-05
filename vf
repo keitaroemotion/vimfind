@@ -7,6 +7,10 @@ vf = VimFind.new(ARGV)
 vf.open(vf.first_arg, WIKIDIR) if vf.option == ":wio"
 
 case vf.option
+when "-hl"
+  system "cat #{vf.virtual_path}" 
+when "-hy"
+  vf.set_virtual
 when "-a"
   system "mkdir -p #{File.dirname(vf.first_arg)}"
   system "vim #{vf.first_arg}"
@@ -20,6 +24,7 @@ when "-h", "--help"
   puts "-a [file] : add and edit file(subdirs automatically added)"
   puts "-w        : oprate local wiki"
   puts "-wl       : enlist local wiki"
+  puts "-hy       : set virtual branch"
   puts "-h        : show help"
   puts
 else
