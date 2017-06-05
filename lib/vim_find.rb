@@ -24,13 +24,16 @@ class VimFind
     system "touch #{virtual_path}" unless File.exist?(virtual_path)
     File.open(virtual_path, "r").to_a.first.strip
   rescue
-    puts "\nyou need to set virtual branch\n\n".green
-    set_virtual
+    nil
   end
 
   def virtual_files
-    `git diff --name-only #{virtual_branch}`.split("\n").map do |file|
-      "#{file} #{virtual_branch}"
+    branch = virtual_branch
+    if branch.size == 0
+      return []
+    end
+    `git diff --name-only #{branch}`.split("\n").map do |file|
+      "#{file} #{branch}"
     end
   end
 
@@ -416,6 +419,7 @@ class VimFind
       puts "[r: rubocop search   ][b: blame               ]"
 
       print "[p:prev n:next] Enter: ".cyan
+      f = f.split(" ").first
       input = $stdin.gets.chomp.downcase
       open_test(f) if input == "ct"
       open_test(f, true) if input == "ce"
