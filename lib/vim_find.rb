@@ -12,6 +12,11 @@ class VimFind
   def initialize(params)
     @params   = params
     @terms    = terms
+    @diff_only = false
+    if params.include?("-do")
+      @diff_only = true
+      @terms = @terms.select{|x| x != "-do"}
+    end
     @mvc_mode = mvc_mode
   end
 
@@ -139,10 +144,11 @@ class VimFind
 
   def list_files(dir, terms, mvc)
     files = Dir.glob(dir)
-    is_virtual = true
-    if is_virtual
+    if @diff_only
+      files = virtual_files
+    else
       files += virtual_files
-    end
+    end  
     files.select{|file| includes(file, terms) }
   end
 
