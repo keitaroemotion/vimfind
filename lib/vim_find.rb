@@ -407,6 +407,7 @@ class VimFind
     if file[1] != ""
       file[1] += ": "
     end
+    system "git --no-pager diff #{file[1]} #{file.first}"
     puts "file: [#{file[1].yellow}#{file.first}] ?"
   end
 
