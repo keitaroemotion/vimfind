@@ -139,11 +139,13 @@ class VimFind
   def match(file, term)
     file.downcase.include?(term.start_with?("^") ? "/"+term.gsub("^","") : term)
   end
-  
+
   def includes(file, terms)
+    check_file(file)
     terms          = str_to_a(terms)
-    content_tokens    = get_words(terms)
-    name_tokens = get_non_words(terms)
+
+    content_tokens = get_words(terms)
+    name_tokens    = get_non_words(terms)
 
     (content_tokens.size == 0 || words_in_file_content?(file, content_tokens)) && \
     (name_tokens.size == 0 || words_in_file_name?(file, name_tokens))
@@ -579,6 +581,10 @@ class VimFind
   end
 
   private 
+
+  def check_file(file)
+    abort "\nFile [#{file}] does not exist.\n\n".red unless File.exist?(file)
+  end
 
   def words_in_file_name?(file, non_terms)
     matches = non_terms.select { |term| match(file, term) }

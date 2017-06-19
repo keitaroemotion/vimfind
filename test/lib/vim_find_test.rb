@@ -5,6 +5,7 @@ require "./test/test_helper.rb"
 class VimFindTest < Minitest::Test
   def setup
     @vf = VimFind.new(["foo", "bar", "./etc/files/moomin_valley"])
+    @aho_myoomin = "./etc/files/aho_myoomin.moo"
   end
 
   def test_random_param_is_okay
@@ -111,16 +112,16 @@ class VimFindTest < Minitest::Test
   end
 
   def test_is_term_in_file
-    assert @vf.is_term_in_file("./etc/files/aho_myoomin.moo", "kakko")
-    assert @vf.is_term_in_file("./etc/files/aho_myoomin.moo", ["kakko"])
-    refute @vf.is_term_in_file("./etc/files/aho_myoomin.moo", ["oyaji"])
+    assert @vf.is_term_in_file(@aho_myoomin, "kakko")
+    assert @vf.is_term_in_file(@aho_myoomin, ["kakko"])
+    refute @vf.is_term_in_file(@aho_myoomin, ["oyaji"])
   end
 
   def test_includes
-    assert @vf.includes("./etc/files/aho_myoomin.moo", "?kakko")
-    assert @vf.includes("./etc/files/aho_myoomin.moo", "aho")
-    assert @vf.includes("./etc/files/aho_myoomin.moo", ["aho", "?kakko"])
-    refute @vf.includes("./etc/files/aho_myoomin.moo", ["aho", "?unko"])
-    refute @vf.includes("./etc/files/aho_myoomin.moo", ["aha", "?kakko"])
+    assert @vf.includes(@aho_myoomin, "?kakko")
+    assert @vf.includes(@aho_myoomin, "aho")
+    assert @vf.includes(@aho_myoomin, ["aho", "?kakko"])
+    refute @vf.includes(@aho_myoomin, ["aho", "?unko"])
+    refute @vf.includes(@aho_myoomin, ["aha", "?kakko"])
   end
 end  
