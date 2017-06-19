@@ -77,4 +77,8 @@ class VimFindTest < Minitest::Test
     @vf = VimFind.new(["foo", "bar", "./etc/fake_dir/"])
     assert_equal Dir.pwd, @vf.get_directory
   end
+
+  def test_directory
+    assert_equal "./etc/files/moomin_valley/**/*", @vf.directory
+  end
 end  
