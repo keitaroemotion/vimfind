@@ -86,4 +86,13 @@ class VimFindTest < Minitest::Test
     content = "boku wa moomin miyu yooh\nkakko heart\n"
     assert_equal content, @vf.file_open("./etc/files/aho_myoomin.moo", "r")
   end
+
+  def test_get_words
+    list = %w(moomin miyu ahomumi)
+    assert_equal list, @vf.get_words(["?moomin", "floren", "?miyu", "?ahomumi"]) 
+  end
+
+  def test_get_words_never_fails
+    assert_equal [], @vf.get_words(["moomin", "floren", "mi?yu", "ahomumi?"]) 
+  end
 end  
