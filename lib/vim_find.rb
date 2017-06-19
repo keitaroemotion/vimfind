@@ -71,8 +71,8 @@ class VimFind
 
   def disp_instruction() abort "\nyou need argument.\n".red end
 
-  def add_test(arr)
-    arr + arr.map {|a| "test/#{a}"}
+  def add_test(file_names)
+    file_names + file_names.map {|file| "test/#{file}"}
   end
 
   def terms

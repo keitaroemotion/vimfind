@@ -45,5 +45,23 @@ class VimFindTest < Minitest::Test
     assert_equal "bar", @vf.first_arg
   end
 
+  def test_disp_instruction
+    # TBD 
+  end
 
+  def test_add_test
+    files = %w(
+      app/moomin/daisuki/hoahoa.rb
+      app/moomin/daisuki/manuke.rb
+      app/controller/template.rb
+      lib/hoahoa/moomoo.rb
+    )
+    test_files = %w(
+      test/app/moomin/daisuki/hoahoa.rb
+      test/app/moomin/daisuki/manuke.rb
+      test/app/controller/template.rb
+      test/lib/hoahoa/moomoo.rb   
+    )
+    assert_equal files + test_files, @vf.add_test(files) 
+  end
 end  
