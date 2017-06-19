@@ -124,4 +124,13 @@ class VimFindTest < Minitest::Test
     refute @vf.includes(@aho_myoomin, ["aho", "?unko"])
     refute @vf.includes(@aho_myoomin, ["aha", "?kakko"])
   end
+
+  def test_colorize
+    text = "i have a pen. i have an apple. uhhn, apple pen?"
+    terms = ["apple", "pen"]
+    colorized_text = "i have a #{'pen'.green}. " \
+                     "i have an #{'apple'.green}. uhhn, " \
+                     "#{'apple'.green} #{'pen'.green}?"
+    assert_equal colorized_text,  @vf.colorize(text, terms)
+  end
 end  

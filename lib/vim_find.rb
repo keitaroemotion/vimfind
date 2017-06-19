@@ -151,7 +151,7 @@ class VimFind
     (name_tokens.size == 0 || words_in_file_name?(file, name_tokens))
   end
 
-  def replace(text, terms)
+  def colorize(text, terms)
     terms.each { |term| text = text.gsub(term, "#{term.green}") }
     text
   end
@@ -168,7 +168,7 @@ class VimFind
 
   def display_matches(f, terms)
     File.open(f, "r").each_with_index do |item, index|
-      print replace("#{item}", terms) if  has_words(terms, item) 
+      print colorize("#{item}", terms) if  has_words(terms, item) 
     end if File.file?(f)
   end
 
@@ -416,7 +416,7 @@ class VimFind
   end
 
   def show_file_name(f, terms)
-    file = replace(File.basename(f), terms).split(" ")
+    file = colorize(File.basename(f), terms).split(" ")
     
     if file.size == 1
       puts "file: [#{file.first}] ?"
@@ -451,8 +451,8 @@ class VimFind
 
   def execute_file(dir, files, f, index, mvc_keyword, terms, next_flag=false)
     if (!mvc_keyword || file_open(f, "r").include?(mvc_keyword))
-      file_path = replace(f, terms)
-      puts "dir:  [#{replace(File.dirname(f), terms)}]"
+      file_path = colorize(f, terms)
+      puts "dir:  [#{colorize(File.dirname(f), terms)}]"
       show_file_name(f, terms)
       puts "[v: open with vim    ][q: quit                ]".cyan
       puts "[l: list methods     ][d: db schema search    ]"
