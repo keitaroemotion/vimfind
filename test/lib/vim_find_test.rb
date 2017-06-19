@@ -100,4 +100,9 @@ class VimFindTest < Minitest::Test
     res = @vf.get_non_words(%w(aho miyu ?moo ?myoo ?moomi ?moooo ?iyamumi ?hoammumi))
     assert_equal %w(aho miyu), res
   end
+
+  def test_get_non_words_never_fails
+    res = @vf.get_non_words(%w(?moo ?myoo ?moomi ?moooo ?iyamumi ?hoammumi))
+    assert_equal [], res
+  end
 end  
