@@ -403,11 +403,35 @@ class VimFind
 
   def show_file_name(f, terms)
     file = replace(File.basename(f), terms).split(" ")
+    
+    if file.size == 1
+      puts "file: [#{file.first}] ?"
+      return
+    end
+
     file.push ""
     if file[1] != ""
       file[1] += ": "
     end
-    system "git --no-pager diff #{file[1]} #{file.first}"
+    p = `git --no-pager diff develop #{file[1]} #{file.first}`
+    if p.empty?
+      if File.exist?(f)
+        File.open(f, "r").each do |line|
+          puts line.green
+        end
+      else 
+        p = `git show #{file[1]}:#{f}`
+        puts p.magenta
+      end
+    else
+      p.split("\n").each do |line|
+        if line.start_with?("-")
+          puts line.red
+        elsif line.start_with?("+")
+          puts line.green
+        end
+      end
+    end  
     puts "file: [#{file[1].yellow}#{file.first}] ?"
   end
 
@@ -424,14 +448,18 @@ class VimFind
       puts "[ce: execute corresponding test]".magenta
       puts "[vb: virtual branch reference]"
       puts "[r: rubocop search   ][b: blame               ]"
+      puts "[rm: remove this file]"
+      # TODO: free commadn execution should be added and 
+      # bunch of commands above needs to be trimmed later.
 
       print "[p:prev n:next] Enter: ".cyan
       f = f.split(" ").first
       input = $stdin.gets.chomp.downcase
-      open_test(f) if input == "ct"
-      open_test(f, true) if input == "ce"
+      open_test(f)                  if input == "ct"
+      open_test(f, true)            if input == "ce"
+      system "rm #{f}"              if input == "rm"
       check_db(dir)                 if input == "d"
-      system "vim #{format_into_mac(f)}"             if (input == "y" || input == "v")
+      system "vim #{format_into_mac(f)}" if (input == "y" || input == "v")
       open_file(f)                  if input == "o"
       refer(f)                      if input == "vb" 
       system "rubocop #{f}"         if input == "r"
