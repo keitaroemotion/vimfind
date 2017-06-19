@@ -120,6 +120,7 @@ class VimFindTest < Minitest::Test
     assert @vf.includes("./etc/files/aho_myoomin.moo", "?kakko")
     assert @vf.includes("./etc/files/aho_myoomin.moo", "aho")
     assert @vf.includes("./etc/files/aho_myoomin.moo", ["aho", "?kakko"])
+    refute @vf.includes("./etc/files/aho_myoomin.moo", ["aho", "?unko"])
     refute @vf.includes("./etc/files/aho_myoomin.moo", ["aha", "?kakko"])
   end
 end  
