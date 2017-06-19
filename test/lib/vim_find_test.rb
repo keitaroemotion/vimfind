@@ -115,4 +115,11 @@ class VimFindTest < Minitest::Test
     assert @vf.is_term_in_file("./etc/files/aho_myoomin.moo", ["kakko"])
     refute @vf.is_term_in_file("./etc/files/aho_myoomin.moo", ["oyaji"])
   end
+
+  def test_includes
+    assert @vf.includes("./etc/files/aho_myoomin.moo", "?kakko")
+    assert @vf.includes("./etc/files/aho_myoomin.moo", "aho")
+    assert @vf.includes("./etc/files/aho_myoomin.moo", ["aho", "?kakko"])
+    refute @vf.includes("./etc/files/aho_myoomin.moo", ["aha", "?kakko"])
+  end
 end  

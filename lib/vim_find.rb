@@ -118,24 +118,35 @@ class VimFind
       && (terms.size > 0)
   end
 
-  def is_term_in_file(file, terms)
-    terms = [terms] if terms.kind_of?(String)
-    has_words(terms, file_open(file, "r"))
+  #
+  # todo: make test
+  #
+  def str_to_a(arr)
+    arr.kind_of?(String) ? [arr] : arr
   end
 
-  def includes(file, terms, words_in_file_name=true, words_in_file_content=true)
-    non_terms = get_non_words(terms) 
-    terms     = get_words(terms)
-    words_in_file_content =
-      File.file?(file) && is_term_in_file(file, terms) if terms.size > 0
-    words_in_file_name = non_terms.select{ |term|
-                           if term.start_with?("^")
-                             file.downcase.include?("/"+term.gsub("^",""))
-                           else
-                             file.downcase.include?(term)
-                           end
-                         }.size == non_terms.size if non_terms.size > 0
-    words_in_file_name && words_in_file_content                      
+  def is_term_in_file(file, terms)
+    has_words(str_to_a(terms), file_open(file, "r"))
+  end
+  
+  #
+  # to test
+  #
+  def words_in_file_content?(file, terms)
+    terms.size == 0 || (File.file?(file) && is_term_in_file(file, terms))
+  end
+
+  def match(file, term)
+    file.downcase.include?(term.start_with?("^") ? "/"+term.gsub("^","") : term)
+  end
+  
+  def includes(file, terms)
+    terms          = str_to_a(terms)
+    content_tokens    = get_words(terms)
+    name_tokens = get_non_words(terms)
+
+    (content_tokens.size == 0 || words_in_file_content?(file, content_tokens)) && \
+    (name_tokens.size == 0 || words_in_file_name?(file, name_tokens))
   end
 
   def replace(text, terms)
@@ -565,5 +576,12 @@ class VimFind
       system "echo #{supply(@params[2])} >> #{wikifile}" if @params[2]
       system "vim #{wikifile}" if !@params[2]
     end
+  end
+
+  private 
+
+  def words_in_file_name?(file, non_terms)
+    matches = non_terms.select { |term| match(file, term) }
+    matches.size == non_terms.size
   end
 end 
