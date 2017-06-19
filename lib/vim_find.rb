@@ -119,6 +119,7 @@ class VimFind
   end
 
   def is_term_in_file(file, terms)
+    terms = [terms] if terms.kind_of?(String)
     has_words(terms, file_open(file, "r"))
   end
 

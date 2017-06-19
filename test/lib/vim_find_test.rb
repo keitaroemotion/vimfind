@@ -109,4 +109,10 @@ class VimFindTest < Minitest::Test
   def test_has_words
     assert_equal false, @vf.has_words(%w(moomin floren ranma shampoo), "shampoo")
   end
+
+  def test_is_term_in_file
+    assert @vf.is_term_in_file("./etc/files/aho_myoomin.moo", "kakko")
+    assert @vf.is_term_in_file("./etc/files/aho_myoomin.moo", ["kakko"])
+    refute @vf.is_term_in_file("./etc/files/aho_myoomin.moo", ["oyaji"])
+  end
 end  
