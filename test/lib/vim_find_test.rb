@@ -4,7 +4,7 @@ require "./test/test_helper.rb"
 
 class VimFindTest < Minitest::Test
   def setup
-    @vf = VimFind.new(["foo", "bar"])
+    @vf = VimFind.new(["foo", "bar", "./etc/files/moomin_valley"])
   end
 
   def test_random_param_is_okay
@@ -63,5 +63,13 @@ class VimFindTest < Minitest::Test
       test/lib/hoahoa/moomoo.rb   
     )
     assert_equal files + test_files, @vf.add_test(files) 
+  end
+
+  def test_terms
+    assert_equal ["foo", "bar", "./etc/files/moomin_valley"], @vf.terms
+  end
+
+  def test_get_directory
+    assert_equal "./etc/files/moomin_valley", @vf.get_directory
   end
 end  

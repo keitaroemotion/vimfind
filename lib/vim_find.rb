@@ -17,7 +17,7 @@ class VimFind
       @diff_only = true
       @terms = @terms.select{|x| x != "-do"}
     end
-    @mvc_mode = mvc_mode
+    #@mvc_mode = mvc_mode
   end
 
   def virtual_path
@@ -79,13 +79,13 @@ class VimFind
     @params.size > 0 ? @params : disp_instruction
   end  
 
-  def mvc_mode
-    if @params.include?("-mvc") 
-      add_test(["controllers","models","views", "backends"]) 
-    else  
-      []
-    end  
-  end
+  #def mvc_mode
+  #  if @params.include?("-mvc") 
+  #    add_test(["controllers","models","views", "backends"]) 
+  #  else  
+  #    []
+  #  end  
+  #end
 
   def get_directory
     begin
