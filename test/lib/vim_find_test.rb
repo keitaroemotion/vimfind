@@ -81,4 +81,9 @@ class VimFindTest < Minitest::Test
   def test_directory
     assert_equal "./etc/files/moomin_valley/**/*", @vf.directory
   end
+
+  def test_file_open
+    content = "boku wa moomin miyu yooh\nkakko heart\n"
+    assert_equal content, @vf.file_open("./etc/files/aho_myoomin.moo", "r")
+  end
 end  
