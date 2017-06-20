@@ -232,4 +232,18 @@ class VimFindTest < Minitest::Test
     nyan = "a  nata no  koto   ga         kirai"
     assert_equal "a_nata_no_koto_ga_kirai", @vf.fix_label(nyan)
   end
+
+  def test_is_source
+    result = %w(
+      ./etc/unko/moomin.rb
+      ./etc/unko/a.json
+      ./etc/unko/unko.js
+      ./etc/unko/unko.html
+      ./etc/unko/unko
+      ./etc/unko/unko.unkokko
+    ).map do |file|
+      @vf.is_source(file)
+    end
+    assert_equal [true, false, true, true, false, true], result
+  end
 end  
