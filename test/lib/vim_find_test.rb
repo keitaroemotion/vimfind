@@ -197,4 +197,11 @@ class VimFindTest < Minitest::Test
    assert @vf.contains(%w(moomin hoamumi floren), "floren")
    refute @vf.contains(%w(moomin hoamumi floren), "aaaaa")
   end
+
+  def test_text_has
+    line = "pen pine apple apple pen"
+    assert @vf.text_has(%w(pine pen), line)
+    refute @vf.text_has(%w(oppai pai), line)
+    assert @vf.text_has(%w(oppai pen), line)
+  end
 end  
