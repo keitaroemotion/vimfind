@@ -227,4 +227,9 @@ class VimFindTest < Minitest::Test
     path = "oyaji(aho) noyume dakara"
     assert_equal "oyaji\\(aho\\)\\ noyume\\ dakara", @vf.format_into_mac(path)
   end
+ 
+  def test_fix_label
+    nyan = "a  nata no  koto   ga         kirai"
+    assert_equal "a_nata_no_koto_ga_kirai", @vf.fix_label(nyan)
+  end
 end  
