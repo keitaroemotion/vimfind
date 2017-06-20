@@ -9,7 +9,7 @@ class VimFind
   LIST = %w(def concerning belongs_to has_one has_many test)
   WIKIDIR =  "/usr/local/etc/vimfind/wiki"  
 
-  def initialize(params)
+  def initialize(params, debug_mode = nil)
     @params   = params
     @terms    = terms
     @diff_only = false
@@ -17,7 +17,7 @@ class VimFind
       @diff_only = true
       @terms = @terms.select{|x| x != "-do"}
     end
-    #@mvc_mode = mvc_mode
+    @debug_mode = debug_mode
   end
 
   def virtual_path
@@ -272,10 +272,19 @@ class VimFind
     a ? input.split(" ") : input
   end
 
+  def ask_simple(msg)
+    if @debug_mode
+      @debug_mode
+    else
+      print "#{msg} "
+      input = $stdin.gets.chomp.downcase
+      abort if input == "q"
+      input
+    end  
+  end
+
   def ask(msg, f, terms, a=false)
-    print "#{msg} "
-    input = $stdin.gets.chomp
-    abort if input == "q"
+    input = ask_simple(msg)
     test(f, terms) if input == ""
     a ? input.split(" ") : input
   end
@@ -438,6 +447,8 @@ class VimFind
     puts "file: [#{file[1].yellow}#{file.first}] ?"
   end
 
+  
+
   def execute_file(dir, files, f, index, terms, next_flag=false)
     file_path = colorize(f, terms)
     puts "dir:  [#{colorize(File.dirname(f), terms)}]"
@@ -454,9 +465,8 @@ class VimFind
     # TODO: free commadn execution should be added and 
     # bunch of commands above needs to be trimmed later.
 
-    print "[p:prev n:next] Enter: ".cyan
+    input = ask_simple("[p:prev n:next] Enter: ".cyan)
     f = f.split(" ").first
-    input = $stdin.gets.chomp.downcase
     open_test(f)                  if input == "ct"
     open_test(f, true)            if input == "ce"
     system "rm #{f}"              if input == "rm"

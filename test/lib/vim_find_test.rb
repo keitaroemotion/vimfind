@@ -4,7 +4,7 @@ require "./test/test_helper.rb"
 
 class VimFindTest < Minitest::Test
   def setup
-    @vf = VimFind.new(["foo", "bar", "./etc/files/moomin_valley"])
+    @vf = VimFind.new(["foo", "bar", "./etc/files/moomin_valley"], "doubutsu_miyu")
     @aho_myoomin = "./etc/files/aho_myoomin.moo"
     @floren      = "./etc/files/moomin_valley/floren.moo"
   end
@@ -187,6 +187,10 @@ class VimFindTest < Minitest::Test
 
   # this method includes $stdin.gets
   def test_ask_no_abort
+  end
+
+  def test_ask_simple
+    assert_equal "doubutsu_miyu", @vf.ask_simple("who are you?")
   end
 
   def test_ask
