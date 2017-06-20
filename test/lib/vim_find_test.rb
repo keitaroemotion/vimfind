@@ -214,4 +214,17 @@ class VimFindTest < Minitest::Test
     functions = %w(moomin myoo doubutsu)
     assert_equal functions, @vf.survey_test("test/moomin/hoahoa_test.rb")
   end
+
+  def test_unit_test
+    # interactive
+  end
+
+  def test_test
+    # TBD
+  end
+
+  def test_format_into_mac
+    path = "oyaji(aho) noyume dakara"
+    assert_equal "oyaji\\(aho\\)\\ noyume\\ dakara", @vf.format_into_mac(path)
+  end
 end  
