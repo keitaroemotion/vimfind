@@ -7,6 +7,7 @@ class VimFindTest < Minitest::Test
     @vf = VimFind.new(["foo", "bar", "./etc/files/moomin_valley"], "doubutsu_miyu")
     @aho_myoomin = "./etc/files/aho_myoomin.moo"
     @floren      = "./etc/files/moomin_valley/floren.moo"
+    @hoahoa_test = "test/moomin/hoahoa_test.rb"
   end
 
   def test_random_param_is_okay
@@ -194,7 +195,8 @@ class VimFindTest < Minitest::Test
   end
 
   def test_ask
-    # TBD
+    res = @vf.ask("who are you?", @hoahoa_test, ["kakko"])
+    assert_equal "doubutsu_miyu", res
   end
 
   def test_contains
@@ -216,7 +218,7 @@ class VimFindTest < Minitest::Test
 
   def test_survery_test
     functions = %w(moomin myoo doubutsu)
-    assert_equal functions, @vf.survey_test("test/moomin/hoahoa_test.rb")
+    assert_equal functions, @vf.survey_test(@hoahoa_test)
   end
 
   def test_unit_test
@@ -224,7 +226,7 @@ class VimFindTest < Minitest::Test
   end
 
   def test_test
-    # TBD
+    @vf.test(@hoahoa_test, [])
   end
 
   def test_format_into_mac

@@ -266,8 +266,7 @@ class VimFind
   end
 
   def ask_no_abort(msg, f, terms, a=false)
-    print "#{msg} "
-    input = $stdin.gets.chomp.strip
+    input = ask_simple(msg)
     return nil if input == "q" || input == ""
     a ? input.split(" ") : input
   end
