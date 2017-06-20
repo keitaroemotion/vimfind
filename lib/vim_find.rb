@@ -393,11 +393,6 @@ class VimFind
     system vim_targets.uniq.inject("vim "){|a, b| "#{a} #{b}"} if vim_targets.size > 0
   end
 
-  def add_file_to_wiki(f)
-      print "[TERM] "
-      system "echo #{f} >> #{WIKIDIR}/#{$stdin.gets.chomp}" 
-  end
-
   def open_test(f, exe=false)
     test_name = File.basename(f).gsub(".rb","_test.rb")
     Dir["**/#{test_name}"].each do |test_file|
@@ -443,68 +438,65 @@ class VimFind
     puts "file: [#{file[1].yellow}#{file.first}] ?"
   end
 
-  def execute_file(dir, files, f, index, mvc_keyword, terms, next_flag=false)
-    if (!mvc_keyword || file_open(f, "r").include?(mvc_keyword))
-      file_path = colorize(f, terms)
-      puts "dir:  [#{colorize(File.dirname(f), terms)}]"
-      show_file_name(f, terms)
-      puts "[v: open with vim    ][q: quit                ]".cyan
-      puts "[l: list methods     ][d: db schema search    ]"
-      puts "[t: execute test     ][f: file sort           ]"
-      puts "[o: open file        ][a: add file to wiki    ]"
-      puts "[ct: open corresponding test with vim]".yellow
-      puts "[ce: execute corresponding test]".magenta
-      puts "[vb: virtual branch reference]"
-      puts "[r: rubocop search   ][b: blame               ]"
-      puts "[rm: remove this file]"
-      # TODO: free commadn execution should be added and 
-      # bunch of commands above needs to be trimmed later.
+  def execute_file(dir, files, f, index, terms, next_flag=false)
+    file_path = colorize(f, terms)
+    puts "dir:  [#{colorize(File.dirname(f), terms)}]"
+    show_file_name(f, terms)
+    puts "[v: open with vim    ][q: quit                ]".cyan
+    puts "[l: list methods     ][d: db schema search    ]"
+    puts "[t: execute test     ][f: file sort           ]"
+    puts "[o: open file        ][rm: remove this file]"
+    puts "[ct: open corresponding test with vim]".yellow
+    puts "[ce: execute corresponding test]".magenta
+    puts "[vb: virtual branch reference]"
+    puts "[r: rubocop search   ][b: blame               ]"
+    puts 
+    # TODO: free commadn execution should be added and 
+    # bunch of commands above needs to be trimmed later.
 
-      print "[p:prev n:next] Enter: ".cyan
-      f = f.split(" ").first
-      input = $stdin.gets.chomp.downcase
-      open_test(f)                  if input == "ct"
-      open_test(f, true)            if input == "ce"
-      system "rm #{f}"              if input == "rm"
-      check_db(dir)                 if input == "d"
-      system "vim #{format_into_mac(f)}" if (input == "y" || input == "v")
-      open_file(f)                  if input == "o"
-      refer(f)                      if input == "vb" 
-      system "rubocop #{f}"         if input == "r"
-      add_file_to_wiki(f)           if input == "a"
-      collect_funcs(f)              if input == "l"
-      test(f, terms, "t")                if input == "t"
-      test(f, terms, "t")           if input == "tt"
-      open_https(f)                 if input == "u"
-      system "git blame #{f}"       if input == "b"
-      execute_files(sort(files, index), mvc_keyword, terms, dir) if input == "p"
-      abort                         if input == "q"
-      next_flag = true              if input == "n"
-      FuncSort.sort(f)              if input == "f"
-      if input == "s"
-        print "[term:] "
-        search_all($stdin.gets.chomp.split(' '), dir, [], mvc_keyword) 
-      end
-      execute_file(dir, files, f, index, mvc_keyword, terms) unless next_flag
+    print "[p:prev n:next] Enter: ".cyan
+    f = f.split(" ").first
+    input = $stdin.gets.chomp.downcase
+    open_test(f)                  if input == "ct"
+    open_test(f, true)            if input == "ce"
+    system "rm #{f}"              if input == "rm"
+    check_db(dir)                 if input == "d"
+    system "vim #{format_into_mac(f)}" if (input == "y" || input == "v")
+    open_file(f)                  if input == "o"
+    refer(f)                      if input == "vb" 
+    system "rubocop #{f}"         if input == "r"
+    collect_funcs(f)              if input == "l"
+    test(f, terms, "t")                if input == "t"
+    test(f, terms, "t")           if input == "tt"
+    open_https(f)                 if input == "u"
+    system "git blame #{f}"       if input == "b"
+    execute_files(sort(files, index), terms, dir) if input == "p"
+    abort                         if input == "q"
+    next_flag = true              if input == "n"
+    FuncSort.sort(f)              if input == "f"
+    if input == "s"
+      print "[term:] "
+      search_all($stdin.gets.chomp.split(' '), dir, [], mvc_keyword) 
     end
+    execute_file(dir, files, f, index, terms) unless next_flag
   end
 
   #
   # needs refactoring with this shitty boiler plate
   #
-  def execute_files(files, mvc_keyword, terms, dir, i=0)
+  def execute_files(files, terms, dir, i=0)
     key_terms = get_words(terms)
     if terms.size == 1
       puts terms
       files.select{|x| File.basename(x).start_with?(terms[0])}.each_with_index do |f, index|
-        execute_file dir, files, f, index, mvc_keyword, terms
+        execute_file dir, files, f, index, terms
       end
       files.select{|x| !File.basename(x).start_with?(terms[0])}.each_with_index do |f, index|
-        execute_file dir, files, f, index, mvc_keyword, terms
+        execute_file dir, files, f, index, terms
       end
     else
       files.each_with_index do |f, index|
-        execute_file dir, files, f, index, mvc_keyword, terms
+        execute_file dir, files, f, index, terms
       end
     end  
   end
@@ -514,64 +506,10 @@ class VimFind
     system "open #{File.dirname(f)}/#{basename}"
   end
 
-  def search_all(terms=nil, dir=nil, mvc=false, mvc_keyword="")
+  def search_all(terms=nil, dir=nil)
     terms ||= @terms 
     dir   ||= directory
-    execute_files list_files(dir, terms), mvc_keyword, terms, dir
-  end
-
-  def enlist_wiki(wikidir, arg)
-    system "ls #{wikidir}" if !arg 
-    look_for_similar_file(wikidir, arg) if arg
-  end
-
-  def look_for_similar_file(dir, tag)
-    Dir["#{dir}/*"].each do |file|
-      if File.basename(file).start_with?(tag)
-        print "#{File.basename(file)}[Y/n]? "
-        return file if $stdin.gets.chomp.downcase == "y"
-      end
-    end
-    abort "done:"
-  end
-
-  def get_term(cmd, wikidir)
-    term = cmd
-    print "[term:] " if !cmd
-    term =  $stdin.gets.chomp if !cmd
-    if cmd == ":r"
-      ls = Dir["#{wikidir}/*"]
-      term = File.basename ls[Random.rand(ls.size-1)] 
-    end
-    term
-  end
-
-  def open(cmd, wikidir)
-      term = get_term(cmd, wikidir)
-      wikifile =  "#{wikidir}/#{term}"
-      wikifile = look_for_similar_file(wikidir, term) if !File.exist?(wikifile)
-      open_https(wikifile)
-  end
-
-  def supply(file)
-    original_file = file
-    file = "#{Dir.pwd}/#{file}" 
-    file = original_file            if !File.exist?(file)
-    abort "#{file} does not exist." if !File.exist?(file)
-    file
-  end
-
-  def operate_wiki
-    system "mkdir -p #{WIKIDIR}"
-    if @params[1] == ":ls" || @params[1] == nil
-      enlist_wiki(WIKIDIR, @params[2])
-    elsif @params[1] == "o" 
-      open(@params[2], WIKIDIR)
-    else
-      wikifile =  "#{WIKIDIR}/#{@params[1]}"
-      system "echo #{supply(@params[2])} >> #{wikifile}" if @params[2]
-      system "vim #{wikifile}" if !@params[2]
-    end
+    execute_files list_files(dir, terms), terms, dir
   end
 
   private 

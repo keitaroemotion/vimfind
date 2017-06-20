@@ -246,4 +246,32 @@ class VimFindTest < Minitest::Test
     end
     assert_equal [true, false, true, true, false, true], result
   end
+
+  def test_open_https
+    # TBD
+  end
+
+  def test_open_test
+    # TBD
+  end
+
+  def test_show_file_name
+    # TBD
+  end
+
+  def test_execute_file
+    # TBD
+  end
+
+  def test_execute_files
+    # TBD
+  end
+
+  def test_open_file
+    # TBD
+  end
+
+  def test_search_all
+    # @vf.search_all TBD
+  end
 end  
