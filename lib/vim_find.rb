@@ -156,14 +156,10 @@ class VimFind
     text
   end
 
-  def list_files(dir, terms, mvc)
+  def list_files(dir, terms)
     files = Dir.glob(dir)
-    if @diff_only
-      files = virtual_files
-    else
-      files += virtual_files
-    end  
-    files.select{|file| includes(file, terms) }
+    files = (@diff_only ? virtual_files : files + virtual_files)
+              .select{|file| includes(file, terms) }
   end
 
   def display_matches(f, terms)
@@ -178,7 +174,6 @@ class VimFind
     [0..i-2].each {|x| new_files.push(files[x])}
     new_files.flatten
   end
-
 
   def paint(t, f)
     puts t.cyan if t.start_with?(LIST[0])
@@ -247,7 +242,7 @@ class VimFind
   end
 
   def check_db(dir, key="create_table ", res=[], hash={})
-    File.open(list_files(dir, %w(db schema.rb), [])[0], "r").each do |line|
+    File.open(list_files(dir, %w(db schema.rb))[0], "r").each do |line|
       if (res.size > 0 && line.include?("end"))
         hash[get_table_name(res, key)] = parse_value(res)
         res = []
@@ -523,7 +518,7 @@ class VimFind
   def search_all(terms=nil, dir=nil, mvc=false, mvc_keyword="")
     terms ||= @terms 
     dir   ||= directory
-    execute_files list_files(dir, terms, mvc), mvc_keyword, terms, dir
+    execute_files list_files(dir, terms), mvc_keyword, terms, dir
   end
 
   def enlist_wiki(wikidir, arg)

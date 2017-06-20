@@ -6,6 +6,7 @@ class VimFindTest < Minitest::Test
   def setup
     @vf = VimFind.new(["foo", "bar", "./etc/files/moomin_valley"])
     @aho_myoomin = "./etc/files/aho_myoomin.moo"
+    @floren      = "./etc/files/moomin_valley/floren.moo"
   end
 
   def test_random_param_is_okay
@@ -133,4 +134,41 @@ class VimFindTest < Minitest::Test
                      "#{'apple'.green} #{'pen'.green}?"
     assert_equal colorized_text,  @vf.colorize(text, terms)
   end
+
+  def test_list_files
+    assert_equal [@aho_myoomin], @vf.list_files(@aho_myoomin, ["min"]) 
+  end
+
+  def test_display_matches 
+    @vf.display_matches(@aho_myoomin, ["kakko"]) 
+    @vf.display_matches(@aho_myoomin, ["kakka"]) 
+  end
+
+  def test_sort
+    # TBD
+  end
+
+  def test_paint
+    # TBD
+  end
+
+  def test_tmpsearch
+    assert_equal ["  def manuke_moo"],  @vf.tmpsearch(@floren, "manuke")
+    # TODO: this might be unexpected: the "  end" has to be trimmed later
+    assert_equal ["  def baka_moo", "  end"],  @vf.tmpsearch(@floren, "baka")
+  end
+
+  #
+  # this method includes $stdin.gets
+  #
+  def test_collect_funcs
+    #funcs = %w(aho_moo manuke_moo iya_moo baka_moo moo_moo ansin_miyune)
+    #assert_equal funcs, @vf.collect_funcs(@floren).map{|func| func.gsub("def " , "")}
+  end
+
+  def test_cf_subroutine
+    res = @vf.cf_subroutine(["def oyaji", "panty", "belongs_to_unko"])  
+    assert_equal ["def oyaji", "belongs_to_unko"], res
+  end
+
 end  
