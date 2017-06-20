@@ -295,12 +295,11 @@ class VimFind
   def survey_test(test_file)
     target_file = "app/#{test_file[5..-1]}".gsub("_test.rb",".rb")
     test_lines = File.read(test_file)
-    functions = File.read(target_file).each_line
+    File.read(target_file).each_line
       .map {|line| line.strip }
       .select { |line| line.start_with?("def ")}
       .select { |func| !test_lines.include?(func) }
       .map {|func| func.gsub("def ", "" )}
-    puts functions  
   end
 
   def unit_test(commands, f, options)
@@ -345,7 +344,7 @@ class VimFind
       end  
 
       if commands.include?("c")
-        survey_test f
+        puts survey_test(f)
         return
       end  
     end

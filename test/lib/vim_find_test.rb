@@ -209,4 +209,9 @@ class VimFindTest < Minitest::Test
     assert @vf.share_nothing(%w(moomin hoahoa), %w(daisuki miyu yoo))
     refute @vf.share_nothing(%w(moomin daisuki), %w(daisuki miyu yoo))
   end
+
+  def test_survery_test
+    functions = %w(moomin myoo doubutsu)
+    assert_equal functions, @vf.survey_test("test/moomin/hoahoa_test.rb")
+  end
 end  
