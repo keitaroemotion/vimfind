@@ -158,9 +158,7 @@ class VimFindTest < Minitest::Test
     assert_equal ["  def baka_moo", "  end"],  @vf.tmpsearch(@floren, "baka")
   end
 
-  #
   # this method includes $stdin.gets
-  #
   def test_collect_funcs
     #funcs = %w(aho_moo manuke_moo iya_moo baka_moo moo_moo ansin_miyune)
     #assert_equal funcs, @vf.collect_funcs(@floren).map{|func| func.gsub("def " , "")}
@@ -171,4 +169,32 @@ class VimFindTest < Minitest::Test
     assert_equal ["def oyaji", "belongs_to_unko"], res
   end
 
+  def test_get_table_name
+    # TBD
+  end
+
+  def test_parse_value
+    # TBD
+  end
+
+  # this method includes $stdin.gets
+  def test_get_command
+  end
+
+  def test_check_db
+    # TBD
+  end
+
+  # this method includes $stdin.gets
+  def test_ask_no_abort
+  end
+
+  def test_ask
+    # TBD
+  end
+
+  def test_contains
+   assert @vf.contains(%w(moomin hoamumi floren), "floren")
+   refute @vf.contains(%w(moomin hoamumi floren), "aaaaa")
+  end
 end  
