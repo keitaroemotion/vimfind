@@ -204,4 +204,9 @@ class VimFindTest < Minitest::Test
     refute @vf.text_has(%w(oppai pai), line)
     assert @vf.text_has(%w(oppai pen), line)
   end
+
+  def test_share_nothing
+    assert @vf.share_nothing(%w(moomin hoahoa), %w(daisuki miyu yoo))
+    refute @vf.share_nothing(%w(moomin daisuki), %w(daisuki miyu yoo))
+  end
 end  
