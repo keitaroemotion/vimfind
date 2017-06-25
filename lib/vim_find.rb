@@ -47,8 +47,7 @@ class VimFind
     p.each_with_index do |branch, i|
       puts "[#{i}] #{branch}"
     end
-    print "[number:] "
-    branch = p[$stdin.gets.chomp.to_i]
+    branch = p[ask_simple("[number:]").to_i]
     system "mkdir -p /usr/local/etc/vf"
     system "echo #{branch} > #{virtual_path}"
     print "[Your Current Virtual Branch is: ] ".green
@@ -206,8 +205,7 @@ class VimFind
         paint(line.strip, f)
       end
       if i > 0
-        print "[q:quit text:code bloc search None:Go next] "
-        command = $stdin.gets.chomp.strip
+        command = ask_simple("[q:quit text:code bloc search None:Go next] ").strip
         case command
         when "q"
           abort
@@ -482,10 +480,9 @@ class VimFind
     execute_files(sort(files, index), terms, dir) if input == "p"
     abort                         if input == "q"
     next_flag = true              if input == "n"
-    FuncSort.sort(f)              if input == "f"
+    Lib::FuncSort.sort(f)         if input == "f"
     if input == "s"
-      print "[term:] "
-      search_all($stdin.gets.chomp.split(' '), dir, [], mvc_keyword) 
+      search_all(ask_simple("[term:]").split(' '), dir, [], mvc_keyword) 
     end
     execute_file(dir, files, f, index, terms) unless next_flag
   end
