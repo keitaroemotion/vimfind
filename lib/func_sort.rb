@@ -6,20 +6,38 @@ module Lib
         end).empty?
     end
 
-    def self.private_methods(lines_r, name_space_count)
-      methods = []
+    def self.end_of_a_method(line, count, name_space_count)
+      line == "end" && (count < name_space_count)
+    end
+
+    def self.private_array(lines, name_space_count, pub=false)
+      unless pub
+        lines = lines.reverse
+      end  
       count = 0
-      lines_r.each do |line|
-        sline = strip(line)
-        if sline == "end" && (count < name_space_count)
-          count +=1            
-        elsif sline == "private"
-          return methods.reverse    
+      methods = []
+      lines.map{ |line| strip(line) }.each do |line|
+        if end_of_a_method(line, count, name_space_count)
+          count += 1
+        elsif line == "private"
+          methods = methods.last == "" ? methods[0..-2] : methods 
+          return pub ? methods : methods.reverse    
         else
           methods.push line
         end  
       end
       methods
+    end
+
+    def self.defs(lines)
+      lines.select {|line| /(def|module|class)\s.*/.match(line) }
+    end
+
+    def self.sort_top_methods(lines)
+
+    end
+
+    def self.private_methods
     end
 
     def self.is_not_dup_blank_lines(lines, index)
@@ -51,13 +69,13 @@ module Lib
           has_terms?(line, ["class", "module"])  
         end.size
         
-      tops = private_methods(lines, 0).reverse
+      tops = private_array(lines, 0).reverse
 
       private_tag = lines_r.select {|line| line.strip == "private" }
 
       privates = 
         privates_to_hash(
-          private_methods(lines_r, name_space_count)
+          private_array(lines_r, name_space_count)
         ).map do |_key, value|
           value.join
         end

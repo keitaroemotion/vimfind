@@ -16,4 +16,21 @@ def BuriBuri < Toilet
     end
     nested_method + "x"
   end
+
+  private
+
+  def pinch_nipple1
+    "oh!"
+  end
+
+  def pinch_nipple2
+    xxxx
+
+    yyy
+    "ooo!"
+  end
+
+  def pinch_nipple3
+    "oh God!"
+  end
 end

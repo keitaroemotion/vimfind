@@ -4,6 +4,8 @@ source "https://rubygems.org"
 gem "bundle"
 gem "rspec"
 gem "colorize"
-gem "minitest"
+gem 'minitest'
 require "minitest/autorun"
+gem 'minitest', group: :test
+gem 'minitest-reporters', group: :test
 
