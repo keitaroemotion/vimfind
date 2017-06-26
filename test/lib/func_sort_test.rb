@@ -49,6 +49,11 @@ module Oppai
         xxx
       end
       def clean
+        ass.do |x|
+          xxx.do |y|
+            zzz
+          end
+        end
         yyy
       end
       def apple 
@@ -172,6 +177,11 @@ module Oppai
       end
 
       def clean
+        ass.do |x|
+          xxx.do |y|
+            zzz
+          end
+        end
         yyy
       end
 

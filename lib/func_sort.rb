@@ -33,22 +33,21 @@ module Lib
       indents = method_indents(lines)
 
       flag = false
-      do_sec = false
+      do_sec = 0
       target      = []
       targets     = []
       non_targets = []
 
       lines.each do |line| 
         if /\.do\s\|/.match(line)
-          puts line.green
-          do_sec = true
+          do_sec += 1
           target.push line
         elsif /^#{indents}def\s.*/.match(line)
           flag = true
           target.push "\n"+line
         elsif /#{indents}end.*/.match(line)
-          if do_sec
-            do_sec = false 
+          if do_sec > 0
+            do_sec -= 1
             target.push line
           else
             flag = false
