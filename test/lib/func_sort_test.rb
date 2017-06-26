@@ -134,19 +134,23 @@ end
       x[0].include?(a)
     end.size > 0
   end
- 
+
+  def get_methods(str, is_public)
+    methods(str)[0]
+      .select do |x| 
+         included = include?(private_defs(str), x)
+         is_public ? !included : included
+      end
+  end
+
   def test_defs
     defs = @fs.defs(@klass_str)
     assert_equal 7,   defs.size
     indents = method_indents(defs)
     assert_equal "    ", indents 
 
-    pub_methods = methods(@klass_str)[0]
-                    .select {|x| !include?(private_defs(@klass_str), x)}
-    pri_methods = methods(@klass_str)[0]
-                    .select {|x| include?(private_defs(@klass_str), x)}
-
-    puts pub_methods.to_s.yellow
+    pub_methods = get_methods(@klass_str, true)
+    pri_methods = get_methods(@klass_str, false)
 
     assert_equal """
     def apple 
