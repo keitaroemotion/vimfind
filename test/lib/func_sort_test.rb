@@ -43,6 +43,9 @@ module Oppai
       CCC = \"vvv\"
 
       def brother 
+        ass.do |x|
+          oppai
+        end
         xxx
       end
       def clean
@@ -150,8 +153,6 @@ end""".split("\n").each_with_index do |line, i|
 
   def test_defs
     sorted_class = @fs.sort_class(@klass_str2).split("\n")
-
-    puts sorted_class.join("\n").green
 """
 module Oppai
   module Unko
@@ -164,6 +165,9 @@ module Oppai
       end
 
       def brother
+        ass.do |x|
+          oppai
+        end
         xxx
       end
 

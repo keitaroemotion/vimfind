@@ -33,18 +33,28 @@ module Lib
       indents = method_indents(lines)
 
       flag = false
+      do_sec = false
       target      = []
       targets     = []
       non_targets = []
 
       lines.each do |line| 
-        if /^#{indents}def\s.*/.match(line)
+        if /\.do\s\|/.match(line)
+          puts line.green
+          do_sec = true
+          target.push line
+        elsif /^#{indents}def\s.*/.match(line)
           flag = true
           target.push "\n"+line
         elsif /#{indents}end.*/.match(line)
-          flag = false
-          targets.push target
-          target = []
+          if do_sec
+            do_sec = false 
+            target.push line
+          else
+            flag = false
+            targets.push target
+            target = []
+          end  
         elsif flag
           target.push line
         else
@@ -239,7 +249,10 @@ module Lib
     end
 
     def self.sort(file)
-      get_lines file  
+      lines = sort_class(File.read(file).split("\n"))
+      f = File.open(file, "w")
+      f.puts lines
+      f.close
     end
   end
 end
