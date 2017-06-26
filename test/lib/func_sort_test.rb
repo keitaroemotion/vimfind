@@ -6,8 +6,8 @@ class FuncSortTest < Minitest::Test
   def setup
     @fs = Lib::FuncSort
     @target_file = "./etc/unko/buriburi.rb"
-    @klass_str = """
-module Unko    
+    @klass_str = 
+"""module Unko    
   def Class < AAA
     BBB = \"bbb\"
     CCC = \"vvv\"
@@ -33,6 +33,38 @@ module Unko
   end
 end  
     """.split("\n")
+
+    @klass_str2 = 
+"""
+module Oppai
+  module Unko    
+    class Class < AAA
+      BBB = \"bbb\"
+      CCC = \"vvv\"
+
+      def brother 
+        xxx
+      end
+      def clean
+        yyy
+      end
+      def apple 
+        zzz
+      end
+
+      private
+
+      def dog 
+        1
+      end
+      def ass 
+        0
+      end
+    end  
+  end
+end  
+    """.split("\n")
+
   end
 
   def test_has_terms?
@@ -71,108 +103,91 @@ end
     #assert_equal public_array, @fs.private_array(lines, 0, true)
   end
 
-  def maximum(lines)
-    lines.select do |line|
-       /\s*def.*/
-        .match(line)
-    end.map do |line|
-      line.split("def ")[0].size
-    end.max
-  end
-
-  def method_indents(klass_str)
-    " ".rjust(maximum(@klass_str))
-  end
-
-  def methods(lines)
-    indents = method_indents(lines)
-
-    flag = false
-    target      = []
-    targets     = []
-    non_targets = []
-
-    lines.each do |line| 
-      if /^#{indents}def\s.*/.match(line)
-        flag = true
-        target.push "\n"+line
-      elsif /#{indents}end.*/.match(line)
-        flag = false
-        targets.push target
-        target = []
-      elsif flag
-        target.push line
-      else
-        non_targets.push line
-      end
-    end 
-
-    targets = targets.map do |target|
-      target + ["#{indents}end"]
-    end
-
-    [targets.sort, non_targets]
-  end
-
-  def private_defs(lines)
-    _lines = []
-    flag = true
-    lines.reverse.each do |line|
-      if line.strip == "private"
-        flag = false 
-      end
-      _lines.push(line) if flag
-    end
-    
-    _lines.select do |line|
-      /(def|module|class)\s.*/.match(line.strip)
-    end
-  end
-
-  def include?(arr, x)
-    arr.select do |a|
-      x[0].include?(a)
-    end.size > 0
-  end
-
-  def get_methods(str, is_public)
-    methods(str)[0]
-      .select do |x| 
-         included = include?(private_defs(str), x)
-         is_public ? !included : included
-      end
+  def test_indents
+    indents = @fs.method_indents(@fs.defs(@klass_str))
+    assert_equal "    ", indents 
   end
 
   def test_defs
     defs = @fs.defs(@klass_str)
     assert_equal 7,   defs.size
-    indents = method_indents(defs)
-    assert_equal "    ", indents 
+  end
 
-    pub_methods = get_methods(@klass_str, true)
-    pri_methods = get_methods(@klass_str, false)
+  def test_defs
+    sorted_class = @fs.sort_class(@klass_str).split("\n")
+"""module Unko
+  def Class < AAA
+    BBB = \"bbb\"
+    CCC = \"vvv\"
 
-    assert_equal """
-    def apple 
+    def apple
       zzz
     end
 
-    def brother 
+    def brother
       xxx
     end
 
     def clean
       yyy
-    end""",  pub_methods.join("\n")  
-    assert_equal """
-    def ass 
+    end
+
+    private
+
+    def ass
       0
     end
 
-    def dog 
+    def dog
       1
-    end""",  pri_methods.join("\n")
+    end
+
   end
+end""".split("\n").each_with_index do |line, i|
+      assert_equal line, sorted_class[i]
+    end
+  end
+
+  def test_defs
+    sorted_class = @fs.sort_class(@klass_str2).split("\n")
+
+    puts sorted_class.join("\n").green
+"""
+module Oppai
+  module Unko
+    class Class < AAA
+      BBB = \"bbb\"
+      CCC = \"vvv\"
+
+      def apple
+        zzz
+      end
+
+      def brother
+        xxx
+      end
+
+      def clean
+        yyy
+      end
+
+      private
+
+      def ass
+        0
+      end
+
+      def dog
+        1
+      end
+
+    end
+  end
+end""".split("\n").each_with_index do |line, i|
+      assert_equal line, sorted_class[i]
+    end
+  end
+
 
   def test_sort_top_methods
   end

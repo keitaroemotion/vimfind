@@ -29,6 +29,124 @@ module Lib
       methods
     end
 
+    def self.methods(lines)
+      indents = method_indents(lines)
+
+      flag = false
+      target      = []
+      targets     = []
+      non_targets = []
+
+      lines.each do |line| 
+        if /^#{indents}def\s.*/.match(line)
+          flag = true
+          target.push "\n"+line
+        elsif /#{indents}end.*/.match(line)
+          flag = false
+          targets.push target
+          target = []
+        elsif flag
+          target.push line
+        else
+          non_targets.push line
+        end
+      end 
+
+      targets = targets.map do |target|
+        target + ["#{indents}end"]
+      end
+
+      [targets.sort, non_targets]
+    end
+
+    def self.private_defs(lines)
+      _lines = []
+      flag = true
+      lines.reverse.each do |line|
+        if line.strip == "private"
+          flag = false 
+        end
+        _lines.push(line) if flag
+      end
+      
+      _lines.select do |line|
+        /(def|module|class)\s.*/.match(line.strip)
+      end
+    end
+
+    def self.sort_class(str) 
+      indents = method_indents(defs(str))
+
+      pub_methods = get_methods(str, true)
+      pri_methods = get_methods(str, false)
+
+      to_sort     = false
+      delimiter = "#{indents}$code_block_moomin" 
+      sorted_class = str.map do |line|
+        if /#{indents}def\s.*/.match(line) && !to_sort
+          to_sort = true
+          delimiter
+        elsif !to_sort
+          line
+        elsif to_sort && /^#{indents.gsub("  ", " ")}end/.match(line)
+          to_sort = false
+          line
+        else
+        end
+      end
+
+      body = pub_methods.join("\n") +
+             "\n\n#{indents}private\n" +
+             pri_methods.join("\n")
+
+      fit_lines(fit_eol(add_ends((sorted_class.join("\n") + "\n")
+        .gsub(delimiter, body))))
+    end
+
+    def self.add_ends(str)
+      tail = str.split("\n").last
+      if /^[\s]*end/.match(tail) 
+        add_ends(str + "\n" + /^[\s]*end/.match(tail).to_s[2..-1])
+      else
+        str
+      end
+    end
+
+    def self.maximum(lines)
+      lines.select do |line|
+         /\s*def.*/
+          .match(line)
+      end.map do |line|
+        line.split("def ")[0].size
+      end.max
+    end
+
+    def self.method_indents(klass_str)
+      " ".rjust(maximum(klass_str))
+    end
+
+    def self.include?(arr, x)
+      arr.select do |a|
+        x[0].include?(a)
+      end.size > 0
+    end
+
+    def self.fit_eol(body)
+      body.include?(" \n") ? fit_eol(body.gsub(" \n", "\n")) : body
+    end
+
+    def self.fit_lines(body)
+      body.include?("\n\n\n") ? fit_lines(body.gsub("\n\n\n", "\n\n")) : body
+    end
+
+    def self.get_methods(str, is_public)
+      methods(str)[0]
+        .select do |x| 
+           included = include?(private_defs(str), x)
+           is_public ? !included : included
+        end
+    end
+
     def self.defs(lines)
       lines.select {|line| /(def|module|class)\s.*/.match(line) }
     end
