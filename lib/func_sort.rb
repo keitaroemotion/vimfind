@@ -39,7 +39,7 @@ module Lib
       non_targets = []
 
       lines.each do |line| 
-        if /\.do\s\|/.match(line)
+        if /(\.do\s\||\.(each|each_with_index)\sdo\s\|)/.match(line)
           do_sec += 1
           target.push line
         elsif /^#{indents}def\s.*/.match(line)
@@ -86,8 +86,15 @@ module Lib
     def self.sort_class(str) 
       indents = method_indents(defs(str))
 
-      pub_methods = get_methods(str, true)
-      pri_methods = get_methods(str, false)
+      pub_methods = [] 
+      pri_methods = []
+
+      if str.join("\n").include?("\n#{indents}private")
+        pub_methods = get_methods(str, true)
+        pri_methods = get_methods(str, false)
+      else
+        pub_methods = get_methods(str, false)
+      end  
 
       to_sort     = false
       delimiter = "#{indents}$code_block_moomin" 
@@ -104,9 +111,10 @@ module Lib
         end
       end
 
-      body = pub_methods.join("\n") +
-             "\n\n#{indents}private\n" +
-             pri_methods.join("\n")
+      body = pub_methods.join("\n")
+      if pri_methods.size > 0
+         body += "\n\n#{indents}private\n" + pri_methods.join("\n")
+      end   
 
       fit_lines(fit_eol(add_ends((sorted_class.join("\n") + "\n")
         .gsub(delimiter, body))))
@@ -114,7 +122,7 @@ module Lib
 
     def self.add_ends(str)
       tail = str.split("\n").last
-      if /^[\s]*end/.match(tail) 
+      if /^[\s]*end/.match(tail) && tail != "end"
         add_ends(str + "\n" + /^[\s]*end/.match(tail).to_s[2..-1])
       else
         str
