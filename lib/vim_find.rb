@@ -355,7 +355,8 @@ class VimFind
       end  
     end
 
-    command = "bundle exec ruby -I test #{f} #{term} #{v}"
+    #command = "bundle exec ruby -I test #{f} #{term} #{v}"
+    command = "ruby -I test #{f} #{term} #{v}"
     puts command.green
     system command
     system "fplay /System/Library/Sounds/Glass.aiff"
@@ -458,12 +459,20 @@ class VimFind
     puts "[ce: execute corresponding test]".magenta
     puts "[vb: virtual branch reference]"
     puts "[r: rubocop search   ][b: blame               ]"
+    puts "[! [command]: execute shell command]"
     puts 
     # TODO: free commadn execution should be added and 
     # bunch of commands above needs to be trimmed later.
 
     input = ask_simple("[p:prev n:next] Enter: ".cyan)
+
     f = f.split(" ").first
+
+    if /^!.*/.match(input) 
+      system "#{input[1..-1]}"
+      puts
+    end
+
     open_test(f)                  if input == "ct"
     open_test(f, true)            if input == "ce"
     system "rm #{f}"              if input == "rm"
