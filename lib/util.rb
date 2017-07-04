@@ -40,9 +40,10 @@ class Util
     files ||= Dir["**/*"]
     if num?(i) || files.size == 1
       system "vim #{files[i.to_i]}"
-    else
-      open_file i, files
+      i = kws
+      files = $files_all
     end
+    open_file i, files
   end
 
   def self.num?(i)
