@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require "colorize"
+
 def operation?(arg)
   /^[\-].+$/ =~ arg
 end
@@ -75,7 +77,6 @@ $dir = "/usr/local/etc/vf/keys"
 
 def add_story
   system "mkdir -p #{$dir}"
-  require "colorize"
   $branches = `git branch`.split(/\n/)
   from_branch = ask_branch("from".cyan, $branches, true).first
   puts "from: #{from_branch}".green
@@ -104,18 +105,53 @@ def add_story
   system "cat #{file_name}"
 end
 
+def swap(branches_to, branch_from, files)
+  branches_to.each do |branch|
+    command = [
+      "git checkout #{branch}",
+      files.map {|file| "git checkout #{branch_from} #{file}" }.join(";"),
+      files.map {|file|"git add #{file}"}.join(";"),
+      "git commit -m 'unmerged files updated'",
+    ].join(";")
+
+    puts
+    command.split(";").each do |c|
+      puts "> #{c.cyan}"
+    end
+    puts
+
+    system command
+  end
+end 
+
 case operations.first
+when "-h"
+  puts
+  puts "synco -h ... help menu"
+  puts "synco -a ... add pattern"
+  puts "synco [pattern] ... sync with pattern"
+  puts "synco -l ... list patterns"
+  puts
 when "-a"
   add_story
-else
-end
+when "-l"  
+  Dir["#{$dir}/*"].each do |x|
+    puts File.basename(x).gsub(".pat", "")
+  end
+else 
+  lines = File.open(File.join($dir, values.first) + ".pat", "r").to_a
+  puts lines
+  from  = lines.select{|line| /^from\:\s.+/ =~ line }.first.split(": ")[1].chomp
+  to    = lines
+            .select { |line| /^to\:\s.+/ =~ line       }
+            .map    { |line| line.split(": ")[1].chomp }
+  files = lines
+            .select { |line| /^file\:\s.+/ =~ line     }
+            .map    { |line| line.split(": ")[1].chomp }
 
-abort
-branches_to.each do |branch|
-  system [
-    "git checkout #{branch}",
-    files.map {|file| "git checkout #{branch_from} #{file}" }.join(";"),
-    files.map {|file|"git add #{file}"}.join(";"),
-    "git commit -m 'unmerged files updated'",
-  ].join(";")
+  puts from.green
+  puts to.to_s.cyan
+  puts files.to_s.magenta
+
+  swap(to, from, files) 
 end
