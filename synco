@@ -106,12 +106,13 @@ def add_story
 end
 
 def swap(branches_to, branch_from, files)
+  extra = operations.include?("-p") ? ";git push origin HEAD" : ""
   branches_to.each do |branch|
     command = [
       "git checkout #{branch}",
       files.map {|file| "git checkout #{branch_from} #{file}" }.join(";"),
       files.map {|file|"git add #{file}"}.join(";"),
-      "git commit -m 'unmerged files updated'",
+      "git commit -m 'unmerged files updated'#{extra}",
     ].join(";")
 
     puts
