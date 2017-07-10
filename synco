@@ -131,6 +131,7 @@ when "-h"
   puts "synco -h ... help menu"
   puts "synco -a ... add pattern"
   puts "synco [pattern] ... sync with pattern"
+  puts "synco [pattern] -p ... sync with pattern and push afterwards"
   puts "synco -l ... list patterns"
   puts
 when "-a"
