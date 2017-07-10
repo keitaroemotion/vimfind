@@ -1,0 +1,121 @@
+#!/usr/bin/env ruby
+
+def operation?(arg)
+  /^[\-].+$/ =~ arg
+end
+
+def operations
+  ARGV.select{ |arg| operation?(arg) }
+end
+
+def values
+  ARGV.select{ |arg| !operation?(arg) }
+end
+
+def ask(msg)
+  print "[#{msg}:] "
+  input = $stdin.gets.chomp.downcase
+  abort if input == "q"
+  input
+end
+
+def ask_branch(msg, branches, allow_one)
+  branches = branches.size == 0 ? $branches : branches
+  show_branches branches
+  print "[#{msg}:] "
+  input = $stdin.gets.chomp.downcase
+  abort if input == "q"
+  if /^[\d\s]+$/ =~ input
+    branches = input.split(/\s/).map { |i| branches[i.to_i] }
+  else
+    branches = branches
+                 .select {|branch| branch.include?(input) }
+                 .map {|branch| branch.strip }
+  end
+  (!allow_one || (allow_one && branches.size == 1)) ? branches : ask_branch(msg, branches, allow_one)
+end
+
+def show_branches(branches)
+  branches.each_with_index do |branch, i|
+    puts "[#{i}] #{branch}" 
+  end
+end
+
+def get_files(files)
+  print("[key words:] ") 
+  opt = $stdin.gets.chomp.downcase
+  return files if opt == "q"
+  key_words = opt.split(/\s/)
+  flag = false
+  $files.push(files.flatten
+    .select {|file| File.file?(file)}
+    .select do |file|
+      key_words.select{|key_word| file.include?(key_word)}.size == key_words.size
+    end.map do |file|
+      unless flag
+        puts "#{file}".green
+        print("add?[Y/n]") 
+        opt = $stdin.gets.chomp.downcase
+      end  
+      case opt
+      when "q"
+        flag = true
+        nil
+      when "y"  
+        file 
+      else  
+        nil
+      end  
+    end.flatten.compact)
+   print "need more?[Y/n] "  
+   get_files(Dir["./**/*"]) if $stdin.gets.chomp.downcase == "y" 
+end
+
+$dir = "/usr/local/etc/vf/keys"
+
+def add_story
+  system "mkdir -p #{$dir}"
+  require "colorize"
+  $branches = `git branch`.split(/\n/)
+  from_branch = ask_branch("from".cyan, $branches, true).first
+  puts "from: #{from_branch}".green
+  to_branches = ask_branch("to(*)".cyan, $branches, false)
+                  .map{|branch| branch.delete("*").strip }
+  to_branches.each do |to_branch|
+    puts "to:   #{to_branch}".cyan
+  end  
+  $files = []
+  get_files(Dir["./**/*"])
+  $files.flatten.each do |file|
+    puts file.yellow
+  end
+
+  name = ask("name of this pattern")
+  file_name = File.join($dir, name + ".pat")
+  f = File.open(file_name, "w")
+  f.puts "from: #{from_branch}"
+  to_branches.each do |branch|
+    f.puts "to: #{branch}"
+  end
+  $files.flatten.each do |file|
+    f.puts "file: #{file}"
+  end
+  f.close
+  system "cat #{file_name}"
+end
+
+case operations.first
+when "-a"
+  add_story
+else
+end
+
+abort
+branches_to.each do |branch|
+  system [
+    "git checkout #{branch}",
+    files.map {|file| "git checkout #{branch_from} #{file}" }.join(";"),
+    files.map {|file|"git add #{file}"}.join(";"),
+    "git commit -m 'unmerged files updated'",
+  ].join(";")
+end
