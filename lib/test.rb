@@ -24,10 +24,9 @@ class Test
     end
 
     puts
+    files = files.select {|f| File.exist?(f) }
     files.each_with_index do |tfile, i|
-      if File.exist?(tfile)
-        puts "#{i}: #{Util.gsubs(tfile, kw)}"
-      end  
+      puts "#{i}: #{Util.gsubs(tfile, kw)}"
     end
     i = Util.index
     return if Util.extra_option_2(i)
