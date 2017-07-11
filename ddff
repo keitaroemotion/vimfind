@@ -28,7 +28,7 @@ end
 
 def refactor_content(files, from, to)
   targets = []
-  files.each do |file|
+  files.select{|file| File.exist?(file)}.each do |file|
     lines = File.open(file, "r").select do |line|
       line.include?(from)
     end
