@@ -10,6 +10,8 @@ class Test
 
   def self.testare(files, kw = "")
     files = Util.filter_tail(files, "_test.rb")
+    files = files.select {|f| File.exist?(f) }
+
     if files.size == 0
       puts "\n0 files found\n".red
       files = $files_all 
@@ -22,9 +24,8 @@ class Test
       system command
       abort
     end
-
     puts
-    files = files.select {|f| File.exist?(f) }
+
     files.each_with_index do |tfile, i|
       puts "#{i}: #{Util.gsubs(tfile, kw)}"
     end
