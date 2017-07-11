@@ -8,6 +8,14 @@ require "/usr/local/lib/vf/sync.rb"
 option = $*[0]
 files = []
 
+def values
+  ARGV.select { |x| /^[^\-]+/ =~ x }
+end
+
+def options
+  ARGV.select { |x| /^[\-]+/ =~ x }
+end
+
 if option == "-a"
   files = Dir["**/*"]
 else  
@@ -18,7 +26,68 @@ else
   $files_all = files.freeze
 end  
 
+def refactor_content(files, from, to)
+  targets = []
+  files.each do |file|
+    lines = File.open(file, "r").select do |line|
+      line.include?(from)
+    end
+    lines.each do |line|
+      puts "- #{line.chomp}".red
+      puts "+ #{line.gsub(from, to.green).chomp}"
+      puts
+    end
+    if lines.size > 0
+      puts "[#{file.yellow}]"
+      print "[ok? y/n]"
+      opt = $stdin.gets.chomp.downcase
+      if opt == "q"
+        abort
+      end
+      if opt == "y"
+        targets.push file
+      end
+    end  
+  end
+  puts
+  targets
+    .map    { |file| [file, File.read(file).gsub(from, to)] }
+    .each do |file, content|
+       puts "> #{file}"
+       f = File.open(file, "w")
+       f.puts content
+       f.close
+    end
+  puts "\noverwritten!\n".red
+end
+
 case option 
+when "refac"
+  from = values[1]
+  to   = values[2]
+  puts "from: #{from} to: #{to}"
+
+  if options.include?("-f")
+    files.each do |file|
+      file_name = File.basename(file)
+      dir_name  = File.dirname(file)
+      if file_name.include?(from)
+        dest = File.join(dir_name, file_name.gsub(from, to))
+        puts "- #{file}".red
+        puts "+ #{dest}".green
+        print "[ok? y/n]"
+        opt = $stdin.gets.chomp.downcase
+        if opt == "q"
+          abort
+        end
+        if opt == "y"
+          system "mv #{file} #{dest}"
+        end
+      end
+    end
+  else
+    refactor_content(files, from, to)
+  end
 when "sync"
   Sync.sync files
 when "-ld"
@@ -48,6 +117,8 @@ when "help", "-h", "--help"
   puts ""
   puts "-a        ... look around (grep + find)"
   puts "-ld [keyword] ... compare a function among classes"
+  puts "refac [from] [to] ... refactor file contents"
+  puts "refac [from] [to] -f  ... refactor file names"
   puts "sync      ... sync files"
   puts "c         ... clean"
   puts "g         ... grep"
