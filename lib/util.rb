@@ -8,7 +8,11 @@ class Util
       files = $files_all
     end
     (files || []).each_with_index do |file, i|
-      puts "#{i.to_s.cyan}: #{Util.gsubs(file, kws)}"
+      if File.exist?(file)
+        puts "#{i.to_s.cyan}: #{Util.gsubs(file, kws)}"
+      else
+        puts "#{i.to_s.magenta}: #{Util.gsubs(file, kws).red}"
+      end
     end
     print alert
     i = Util.index
