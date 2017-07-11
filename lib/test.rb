@@ -25,7 +25,9 @@ class Test
 
     puts
     files.each_with_index do |tfile, i|
-      puts "#{i}: #{Util.gsubs(tfile, kw)}"
+      if File.exist?(tfile)
+        puts "#{i}: #{Util.gsubs(tfile, kw)}"
+      end  
     end
     i = Util.index
     return if Util.extra_option_2(i)
