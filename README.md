@@ -70,6 +70,19 @@ this option can allow you to pick files from another branch, which is not yet me
 
 This option might allow you to copy the result of file list to the clipboard
 
+## refactor option
+
+You can refactor the file content (only within the diffs to the develop branch) as follows:
+```
+$ ddff refac [from] [to]
+```
+
+Or if you want to change the file name:
+```
+$ ddff refac [from] [to] -f
+```
+
+
 ## ymlook
 
 This script is mainly created for reducing the cost of looking through rails yaml fixture relation verbose. ymlook is the powerful tool to find the inconsistent part in `test/fixtures` *automatically*.
