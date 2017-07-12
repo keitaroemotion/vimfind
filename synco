@@ -2,6 +2,8 @@
 
 require "colorize"
 
+$dir = "/usr/local/etc/vf/keys"
+
 def operation?(arg)
   /^[\-].+$/ =~ arg
 end
@@ -73,7 +75,6 @@ def get_files(files)
    get_files(Dir["./**/*"]) if $stdin.gets.chomp.downcase == "y" 
 end
 
-$dir = "/usr/local/etc/vf/keys"
 
 def get_branches
   $branches = `git branch`.split(/\n/)
@@ -152,7 +153,33 @@ when "-l"
     puts File.basename(x).gsub(".pat", "")
   end
 else 
-  lines = File.open(File.join($dir, values.first) + ".pat", "r").to_a
+  file = File.join($dir, values.first) + ".pat"
+  unless File.exist?(file)
+    def find(files, key)
+      files = files
+        .select { |file| file.include?(key) }
+
+      if files.size == 0
+        abort "file size 0"
+      end
+
+      files.each_with_index do |x, i|
+        puts "[#{i}] #{File.basename(x)}"
+      end
+
+      print ">"
+      opt = $stdin.gets.chomp.downcase
+      abort if opt == "q"
+      if /^[\d]+$/ =~ opt
+        return files[opt.to_i]
+      end
+      find(files, opt)
+    end
+
+    file = find(Dir["#{$dir}/*"].to_a, values.first)
+  end  
+
+  lines = File.open(file, "r").to_a
   puts lines
   from  = lines.select{|line| /^from\:\s.+/ =~ line }.first.split(": ")[1].chomp
   to    = lines
