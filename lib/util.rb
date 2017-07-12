@@ -184,7 +184,7 @@ class Util
 
   def self.clean(files)
     result = []
-    files.each do |file|
+    files.select{|f| File.exist?(f) }.each do |file|
       count = 0
       clean_text =
         File.open(file, "r").map do |line|

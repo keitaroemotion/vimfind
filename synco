@@ -75,9 +75,17 @@ end
 
 $dir = "/usr/local/etc/vf/keys"
 
+def get_branches
+  $branches = `git branch`.split(/\n/)
+
+  $current_branch = $branches
+    .select{ |b| b.start_with?("*") }.first
+    .gsub("* ", "")
+end
+
 def add_story
   system "mkdir -p #{$dir}"
-  $branches = `git branch`.split(/\n/)
+  get_branches
   from_branch = ask_branch("from".cyan, $branches, true).first
   puts "from: #{from_branch}".green
   to_branches = ask_branch("to(*)".cyan, $branches, false)
@@ -106,6 +114,7 @@ def add_story
 end
 
 def swap(branches_to, branch_from, files)
+  get_branches
   extra = operations.include?("-p") ? ";git push origin HEAD" : ""
   branches_to.each do |branch|
     command = [
@@ -123,6 +132,8 @@ def swap(branches_to, branch_from, files)
 
     system command
   end
+  puts "git co #{$current_branch}".yellow
+  system "git co #{$current_branch}"
 end 
 
 case operations.first
