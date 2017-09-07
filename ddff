@@ -20,6 +20,9 @@ if option == "-a"
   files = Dir["**/*"]
 else  
   target = !option.nil? && option.start_with?(":") ? option[1..-1] : "develop"
+  if target == "develop" && !`git branch`.include?("develop")
+    target = "master"
+  end
   diff       = `git diff #{target} --name-only`
   files = diff.split("\n")
   puts "\n#{files.size.to_s.magenta} Files\n\n"
@@ -63,6 +66,10 @@ end
 
 case option 
 when "refac"
+  #
+  # this code block looks so fucking verbose that
+  # it needs to be refactored later
+  #
   from = values[1]
   to   = values[2]
   puts "from: #{from} to: #{to}"
@@ -129,5 +136,6 @@ when "help", "-h", "--help"
   puts "help, -h ... help option"
   puts ""
 else
-  Util.open_file $*[0..-1].join(" "), files
+  # Util.open_file $*[0..-1].join(" "), files
+  Util.open $*[0..-1], files, files
 end
