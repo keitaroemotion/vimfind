@@ -101,13 +101,13 @@ when "-ld"
   Util.compare_methods(".", ARGV[1])  
 when "-a"
   Util.grep files, $*[1]
-  Util.open_file $*[1..-1].join(" "), files
+  Util.open ARGV[1], files, files
 when "g"
   Util.grep files, ARGV[1]
 when "t"
-  Test.testare files
+  Util.open ARGV, files, files, true
 when "/"
-  Util.open_file $*[1], files
+  Util.open ARGV[1], files, files
 when "//"
   system files.inject("vim"){ |acc, file| "#{acc} #{file}" } 
 when "c"  
@@ -136,6 +136,5 @@ when "help", "-h", "--help"
   puts "help, -h ... help option"
   puts ""
 else
-  # Util.open_file $*[0..-1].join(" "), files
-  Util.open $*[0..-1], files, files
+  Util.open ARGV, files, files
 end
