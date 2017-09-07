@@ -25,11 +25,15 @@ class Util
       }
  
       puts "\n[test mode: #{test ? 'on'.green : 'off'.red}]"
-      print "\n[q: quit t: test c: cmd a: all] "; input = $stdin.gets.chomp
+      print "\n[q: quit t: test c: cmd a: all -: diff] "; input = $stdin.gets.chomp
       abort if input == "q"
 
       if /^c\s*$/ =~ input
         system input.gsub(/^c\s/, "")
+      end
+
+      if /^-\s*$/ =~ input
+        system "git diff develop #{files.join(' ')}"  
       end
 
       if /^a\s*$/ =~ input
