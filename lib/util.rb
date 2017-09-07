@@ -8,17 +8,18 @@ class Util
       }
       file
     end
- 
+
     #
     # initially, files == original_files
     #
     def open(keywords, files, original_files, test = false)
       regex = Regexp.new("#{keywords.join('.+')}")
- 
+      puts "[regex: #{regex}] test: #{test} size: #{files.size}".yellow
       files = files.select { |file| /_test\.rb/ =~ file } if test
       files = files.select { |file| regex =~ file }
  
-      files = original_files if files.size == 0
+      files = original_files.select { |file| regex =~ file } if files.size == 0
+
       files.each_with_index { |file, i|
         puts "#{i} #{paint(keywords, file)}"
       }
@@ -26,7 +27,6 @@ class Util
       puts "\n[test mode: #{test ? 'on'.green : 'off'.red}]"
       print "\n[q: quit t: test e: edit] "; input = $stdin.gets.chomp
       abort if input == "q"
- 
  
       if /^t\s/ =~ input || /^t$/ =~ input
         return open(
