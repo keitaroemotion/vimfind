@@ -25,14 +25,18 @@ class Util
       }
  
       puts "\n[test mode: #{test ? 'on'.green : 'off'.red}]"
-      print "\n[q: quit t: test -c: command] "; input = $stdin.gets.chomp
+      print "\n[q: quit t: test c: cmd a: all] "; input = $stdin.gets.chomp
       abort if input == "q"
 
-      if /-c/ =~ input
-        system input.gsub(/-c/, "")
+      if /^c\s*$/ =~ input
+        system input.gsub(/^c\s/, "")
       end
 
-      if /^t\s/ =~ input || /^t$/ =~ input
+      if /^a\s*$/ =~ input
+        return open(input[1..-1].split(/\s/), original_files, original_files, test)        
+      end
+
+      if /^t\s*$/ =~ input
         return open(
           input.split(/\s/),
           files,
