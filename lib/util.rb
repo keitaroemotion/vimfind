@@ -4,7 +4,7 @@ class Util
 
     def paint(keywords, file)
       keywords.each { |keyword|
-        file = file.gsub(keyword, keyword.green)
+        file = file.gsub(keyword, keyword.green) if keyword.size > 1
       }
       file
     end
@@ -27,16 +27,13 @@ class Util
       print "\n[q: quit t: test e: edit] "; input = $stdin.gets.chomp
       abort if input == "q"
  
-      if /^(t|e)$/ =~ input
-        return open(keywords, files, original_files, /^t$/ =~ input)
-      end
  
-      if /^(t\s|e\s)/ =~ input
+      if /^t\s/ =~ input || /^t$/ =~ input
         return open(
-          input.gsub(/[te]\s/, "").split(/\s/),
+          input.split(/\s/),
           files,
           original_files,
-          /^t\s/ =~ input
+          !test
         )
       end
       
@@ -46,7 +43,7 @@ class Util
         !test || $stdin.gets.chomp
       end  
       keywords = input.strip != "" ? input.split(/\s/) : keywords
-      open(keywords, files, original_files)        
+      open(keywords, files, original_files, test)        
     end
 
     def num?(i)
