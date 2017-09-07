@@ -25,8 +25,18 @@ class Util
       }
  
       puts "\n[test mode: #{test ? 'on'.green : 'off'.red}]"
-      print "\n[q: quit t: test c: cmd a: all -: diff] "; input = $stdin.gets.chomp
+      print "\n[q: quit t: test c: cmd a: all -: diff g: grep] "; input = $stdin.gets.chomp
       abort if input == "q"
+ 
+      if /^g\s/ =~ input
+        regex = Regexp.new(input[1..-1].gsub(/\s/, ".+"))
+        files = files.select { |file| regex =~ File.read(file) }
+        files.each { |file|
+          puts "[#{file}]".blue
+          File.open(file, "r").each { |line| print line.yellow if regex =~ line }
+        }
+        return open(keywords, files, original_files, test)        
+      end
 
       if /^c\s*$/ =~ input
         system input.gsub(/^c\s/, "")
