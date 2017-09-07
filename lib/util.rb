@@ -25,9 +25,13 @@ class Util
       }
  
       puts "\n[test mode: #{test ? 'on'.green : 'off'.red}]"
-      print "\n[q: quit t: test e: edit] "; input = $stdin.gets.chomp
+      print "\n[q: quit t: test -c: command] "; input = $stdin.gets.chomp
       abort if input == "q"
- 
+
+      if /-c/ =~ input
+        system input.gsub(/-c/, "")
+      end
+
       if /^t\s/ =~ input || /^t$/ =~ input
         return open(
           input.split(/\s/),
