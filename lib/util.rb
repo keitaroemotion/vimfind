@@ -82,8 +82,9 @@ class Util
         puts command.green; system command
         print "\ndone. [press enter]: "
         !test || $stdin.gets.chomp
+      else  
+        keywords = input.strip != "" ? input.split(/\s/) : keywords
       end  
-      keywords = input.strip != "" ? input.split(/\s/) : keywords
       open(keywords, files, original_files, test)        
     end
 
