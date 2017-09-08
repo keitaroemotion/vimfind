@@ -9,16 +9,25 @@ class Util
       file
     end
 
+    def sort_keywords(keywords)
+      [
+        keywords.select {|k| k.start_with?("^") }.map{|k| k.gsub("^", "")},      
+        keywords.select {|k| !k.start_with?("^") }
+      ]  
+    end
+
     #
     # initially, files == original_files
     #
     def open(keywords, files, original_files, test = false)
+      nons, keywords = sort_keywords(keywords)
+
       regex = Regexp.new("#{keywords.join('.+')}")
       puts "[regex: #{regex}] test: #{test} size: #{files.size}".yellow
       files = files.select { |file| /_test\.rb/ =~ file } if test
       files = files.select { |file| regex =~ file }
- 
       files = original_files.select { |file| regex =~ file } if files.size == 0
+      files = files.select { |file| nons.select{|non| file.include?(non)}.size == 0  }
 
       files.each_with_index { |file, i|
         puts "#{i} #{paint(keywords, file)}"
