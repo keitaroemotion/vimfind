@@ -35,10 +35,15 @@ class Util
       files.each_with_index { |file, i|
         puts "#{i} #{paint(keywords, file)}"
       }
- 
+
+
       puts "\n[test mode: #{test ? 'on'.green : 'off'.red}]"
       print "\n[q: quit t: test c: cmd a: all -: diff g: grep @: test all] "; input = $stdin.gets.chomp
       abort if input == "q"
+
+      if /^o\s*$/ =~ input
+        input = "0"
+      end
  
       if /^g\s/ =~ input
         regex = Regexp.new(input[1..-1].gsub(/\s/, ".+"))
@@ -59,12 +64,12 @@ class Util
       end
 
       if /^a\s*$/ =~ input
-        return open(input[1..-1].split(/\s/), original_files, original_files, test)        
+        return open(input[1..-1].split(" "), original_files, original_files, test)        
       end
 
       if /^t\s*$/ =~ input
         return open(
-          input.split(/\s/),
+          input.split(" "),
           files,
           original_files,
           !test
@@ -83,7 +88,7 @@ class Util
         print "\ndone. [press enter]: "
         !test || $stdin.gets.chomp
       else  
-        keywords = input.strip != "" ? input.split(/\s/) : keywords
+        keywords = input.strip != "" ? input.split(" ") : keywords
       end  
       open(keywords, files, original_files, test)        
     end
