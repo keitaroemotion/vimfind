@@ -28,6 +28,8 @@ class Util
     def open(keywords, files, original_files, test = false)
       nons, keywords = sort_keywords(keywords)
 
+      puts "#{keywords}".cyan
+
       if keywords.size > 0
         regex = Regexp.new("#{keywords.join('.+')}")
         puts "[regex: #{regex}] test: #{test} size: #{files.size}".yellow
@@ -35,23 +37,42 @@ class Util
         files = files.select { |file| regex =~ file }
         files = original_files.select { |file| regex =~ file } if files.size == 0
       end  
-      files = files.select { |file| nons.select{|non| file.include?(non)}.size == 0  }
-        
+      if nons.size > 0
+        files = files.select { |file| nons.select{|non| file.include?(non)}.size == 0  }
+      end  
 
       files.each_with_index { |file, i|
         puts "#{i} #{paint(keywords, file)}"
       }
 
       puts "\n[test mode: #{test ? 'on'.green : 'off'.red}]"
-      print "\n[q: quit t: test c: cmd a: all -: diff g: grep @: test all] "
+      puts "[q: quit     t: test       c: cmd           ]"
+      puts "[a: all      -: diff       g: grep          ]"
+      puts "[@: test all A: entire dir D: git diff range]"
+      puts "[o: open index zero                         ]"
+      puts "[,{@}: open the index with comma size       ]"
+      print "> "
 
       input = get_input
 
-      if /^o\s*$/ =~ input
+      if /^[,]+$/ =~ input
+        command = "#{test ? "ruby -I test" : "vim"} #{files[input.size]}"
+        puts command.green; system command
+        print "\ndone. [press enter]: "
+        !test || $stdin.gets.chomp
+      elsif /^\s*$/ =~ input
+        keywords = []
+      elsif /^D\s*/ =~ input
+        files = `git diff develop --name-only`
+        keywords = input.gsub("D ", "").split(" ")
+        original_files = files
+      elsif /^A\s*/ =~ input
+        files = Dir["./**/*"]
+        keywords = input.gsub("A ", "").split(" ")
+        original_files = files
+      elsif /^o\s*$/ =~ input
         input = "0"
-      end
- 
-      if /^g\s/ =~ input
+      elsif /^g\s/ =~ input
         regex = Regexp.new(input[1..-1].gsub(/\s/, ".+"))
         files = files.select { |file| regex =~ File.read(file) }
         files.each { |file|
@@ -59,30 +80,20 @@ class Util
           File.open(file, "r").each { |line| print line.yellow if regex =~ line }
         }
         return open(keywords, files, original_files, test)        
-      end
-
-      if /^c\s*$/ =~ input
+      elsif /^c\s*$/ =~ input
         system input.gsub(/^c\s/, "")
-      end
-
-      if /^-\s*$/ =~ input
+      elsif /^-\s*$/ =~ input
         system "git diff develop #{files.join(' ')}"  
-      end
-
-      if /^a\s*$/ =~ input
+      elsif /^a\s*$/ =~ input
         return open(input[1..-1].split(" "), original_files, original_files, test)        
-      end
-
-      if /^t\s*$/ =~ input
+      elsif /^t\s*$/ =~ input
         return open(
           input.split(" "),
           files,
           original_files,
           !test
         )
-      end
-
-      if /^@/ =~ input
+      elsif /^@/ =~ input
         files.each do |file|
           system "ruby -I test #{file}" if /_test\.rb$/ =~ file
         end
