@@ -15,6 +15,12 @@ class Util
         keywords.select {|k| !k.start_with?("^") }
       ]  
     end
+ 
+    def get_input
+      input = $stdin.gets.chomp
+      abort if input == "q"
+      input
+    end
 
     #
     # initially, files == original_files
@@ -36,10 +42,10 @@ class Util
         puts "#{i} #{paint(keywords, file)}"
       }
 
-
       puts "\n[test mode: #{test ? 'on'.green : 'off'.red}]"
-      print "\n[q: quit t: test c: cmd a: all -: diff g: grep @: test all] "; input = $stdin.gets.chomp
-      abort if input == "q"
+      print "\n[q: quit t: test c: cmd a: all -: diff g: grep @: test all] "
+
+      input = get_input
 
       if /^o\s*$/ =~ input
         input = "0"
@@ -80,9 +86,8 @@ class Util
         files.each do |file|
           system "ruby -I test #{file}" if /_test\.rb$/ =~ file
         end
-      end
-
-      if /^\d+$/ =~ input
+        keywords = []
+      elsif /^\d+$/ =~ input
         command = "#{test ? "ruby -I test" : "vim"} #{files[input.to_i]}"
         puts command.green; system command
         print "\ndone. [press enter]: "
