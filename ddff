@@ -136,5 +136,8 @@ when "help", "-h", "--help"
   puts "help, -h ... help option"
   puts ""
 else
+  if files.size == 0
+    files = Dir["./**/*"].select {|f| File.file?(f)}
+  end
   Util.open ARGV, files, files
 end

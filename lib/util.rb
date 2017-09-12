@@ -22,20 +22,40 @@ class Util
       input
     end
 
+    def vim_or_test(index, test, files)
+      files[index] = files.first unless files.size > index
+      command = "#{test ? "ruby -I test" : "vim"} #{files[index]}"
+      puts command.green; system command
+      print "\ndone. [press enter]: "
+      !test || $stdin.gets.chomp
+    end
+
+    def read(file)
+      File.read(file)
+    rescue => e
+      ""
+    end
+
+    def match?(regex, file)
+      regex =~ read(file)
+    rescue => e
+      false
+    end
+
     #
     # initially, files == original_files
     #
     def open(keywords, files, original_files, test = false)
       nons, keywords = sort_keywords(keywords)
-
-      puts "#{keywords}".cyan
+      puts "\nkeywords: #{keywords}".cyan
+      puts "nons: #{nons}".red
 
       if keywords.size > 0
-        regex = Regexp.new("#{keywords.join('.+')}")
-        puts "[regex: #{regex}] test: #{test} size: #{files.size}".yellow
+        regex = Regexp.new("#{keywords.join('.*')}.*")
+        puts "[regex: #{regex}] test: #{test} size: #{files.size} nons.size: #{nons.size}".yellow
         files = files.select { |file| /_test\.rb/ =~ file } if test
         files = files.select { |file| regex =~ file }
-        files = original_files.select { |file| regex =~ file } if files.size == 0
+        files = Dir["./**/*"].select { |file| regex =~ file } if files.size == 0
       end  
       if nons.size > 0
         files = files.select { |file| nons.select{|non| file.include?(non)}.size == 0  }
@@ -56,10 +76,7 @@ class Util
       input = get_input
 
       if /^[,]+$/ =~ input
-        command = "#{test ? "ruby -I test" : "vim"} #{files[input.size]}"
-        puts command.green; system command
-        print "\ndone. [press enter]: "
-        !test || $stdin.gets.chomp
+        vim_or_test(input.size-1, test, files)
       elsif /^\s*$/ =~ input
         keywords = []
       elsif /^D\s*/ =~ input
@@ -68,17 +85,28 @@ class Util
         original_files = files
       elsif /^A\s*/ =~ input
         files = Dir["./**/*"]
-        keywords = input.gsub("A ", "").split(" ")
+        keywords = input.gsub("A", "").strip.split(" ")
         original_files = files
       elsif /^o\s*$/ =~ input
-        input = "0"
+        vim_or_test(0, test, files)
       elsif /^g\s/ =~ input
-        regex = Regexp.new(input[1..-1].gsub(/\s/, ".+"))
-        files = files.select { |file| regex =~ File.read(file) }
+        regex = Regexp.new(input[1..-1].strip.gsub(" ", ".+"))
+        puts "regex: #{regex.to_s.green}"
+        files = Dir["./**/*"] if files.size == 0
+        files = files
+          .select { |file| File.file?(file) }
+          .select { |file| match?(regex, file) }
+        files = Dir["./**/*"] if files.size == 0
+        files = files
+          .select { |file| File.file?(file) }
+          .select { |file| match?(regex, file) }
+        puts "non found ".red if files.size == 0
+        files = files
         files.each { |file|
           puts "[#{file}]".blue
-          File.open(file, "r").each { |line| print line.yellow if regex =~ line }
+          File.open(file, "r").each { |line| puts line[1..100].yellow if regex =~ line }
         }
+        keywords = input[1..-1].strip.split(" ")
         return open(keywords, files, original_files, test)        
       elsif /^c\s*$/ =~ input
         system input.gsub(/^c\s/, "")
@@ -99,10 +127,7 @@ class Util
         end
         keywords = []
       elsif /^\d+$/ =~ input
-        command = "#{test ? "ruby -I test" : "vim"} #{files[input.to_i]}"
-        puts command.green; system command
-        print "\ndone. [press enter]: "
-        !test || $stdin.gets.chomp
+        vim_or_test(input.to_i, test, files)
       else  
         keywords = input.strip != "" ? input.split(" ") : keywords
       end  
