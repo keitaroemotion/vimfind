@@ -1,10 +1,10 @@
 bundle install
-cp vf /usr/local/bin
-cp vv /usr/local/bin
-cp mvc /usr/local/bin
-cp ymlook /usr/local/bin
-mkdir -p /usr/local/lib/vf
-cp lib/*.rb /usr/local/lib/vf
-cp ddff /usr/local/bin
-cp reb /usr/local/bin
-cp synco /usr/local/bin
+sudo cp vf /usr/local/bin
+sudo cp vv /usr/local/bin
+sudo cp mvc /usr/local/bin
+sudo cp ymlook /usr/local/bin
+sudo mkdir -p /usr/local/lib/vf
+sudo cp lib/*.rb /usr/local/lib/vf
+sudo cp ddff /usr/local/bin
+sudo cp reb /usr/local/bin
+sudo cp synco /usr/local/bin

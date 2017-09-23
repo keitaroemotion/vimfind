@@ -47,7 +47,7 @@ class Util
     #
     def open(keywords, files, original_files, test = false)
       nons, keywords = sort_keywords(keywords)
-      puts "\nkeywords: #{keywords}".cyan
+      print "keywords: #{keywords} ".cyan
       puts "nons: #{nons}".red
 
       if keywords.size > 0
