@@ -4,6 +4,9 @@ sudo cp vv /usr/local/bin
 sudo cp mvc /usr/local/bin
 sudo cp ymlook /usr/local/bin
 sudo mkdir -p /usr/local/lib/vf
+sudo chmod -R 777 /usr/local/lib/vf
+sudo mkdir -p /usr/local/etc/vf
+sudo chmod -R 777 /usr/local/etc/vf
 sudo cp lib/*.rb /usr/local/lib/vf
 sudo cp ddff /usr/local/bin
 sudo cp reb /usr/local/bin
