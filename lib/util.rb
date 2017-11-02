@@ -58,7 +58,9 @@ class Util
         files = Dir["./**/*"].select { |file| regex =~ file } if files.size == 0
       end  
       if nons.size > 0
-        files = files.select { |file| nons.select{|non| file.include?(non)}.size == 0  }
+        puts "\n0 result\n".red
+        return
+        # files = files.select { |file| nons.select{|non| file.include?(non)}.size == 0  }
       end  
 
       files.each_with_index { |file, i|
