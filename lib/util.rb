@@ -73,11 +73,14 @@ class Util
       puts "[@: test all A: entire dir D: git diff range]"
       puts "[o: open index zero                         ]"
       puts "[,{@}: open the index with comma size       ]"
+      puts "[oo: open all]"
       print "> "
 
       input = get_input
 
-      if /^[,]+$/ =~ input
+      if input == "oo"
+        system "vim #{files.join(' ')}"
+      elsif /^[,]+$/ =~ input
         vim_or_test(input.size-1, test, files)
       elsif /^\s*$/ =~ input
         keywords = []
