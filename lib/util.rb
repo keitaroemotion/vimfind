@@ -3,6 +3,9 @@ class Util
   class << self
 
     def paint(keywords, file)
+      unless File.exist?(file)
+        return file.red
+      end
       keywords.each { |keyword|
         file = file.gsub(keyword, keyword.green) if keyword.size > 1
       }
