@@ -122,12 +122,14 @@ class Util
       puts "[o: open index zero                         ]"
       puts "[,{@}: open the index with comma size       ]"
       puts "[lc: load caches][cc: clean caches]"
-      puts "[oo: open all]"
+      puts "[oo: open all]   [ss: shorter first]"
       puts "[tt: auto test all]"
       print "> "
 
       input = get_input
-      if input == "lc"
+      if input == "ss"
+        files = files.sort_by(&:length)
+      elsif input == "lc"
         cache = read_cache
         return open([], cache, cache, test)        
       elsif input == "cc"
