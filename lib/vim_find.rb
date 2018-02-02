@@ -3,6 +3,11 @@ require '/usr/local/lib/vf/func_sort.rb'
 
 class VimFind
 
+  #
+  # XXX this fucking messy code must be refactored
+  #     sooner or later
+  #
+
   attr_reader 
 
   GREP = "?"
@@ -445,10 +450,33 @@ class VimFind
     puts "file: [#{file[1].yellow}#{file.first}] ?"
   end
 
-  
+  def cache_file_path
+    "/usr/local/etc/vimfind/cache"
+  end
+
+  def read_cache
+    File.open(cache_file_path, "r").to_a
+  end
+
+  def cache_file_maximum
+    10
+  end
+
+  def save_cache(new_file)
+    cache_files = read_cache
+    unless cache_files.include?(new_file)
+      File.open(cache_file_path, "w") do |f|
+        cache_files[0..cache_file_maximum].each do |old_file|
+          f.puts old_file
+        end
+        f.puts new_file
+      end
+    end  
+  end
 
   def execute_file(dir, files, f, index, terms, next_flag=false)
     file_path = colorize(f, terms)
+    save_cache(file_path)
     puts "dir:  [#{colorize(File.dirname(f), terms)}]"
     show_file_name(f, terms)
     puts "[v: open with vim    ][q: quit                ]".cyan

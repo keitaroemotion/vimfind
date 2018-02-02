@@ -1,8 +1,11 @@
 class Util
   require "colorize"
+  require "fileutils"
+
   class << self
 
     def paint(keywords, file)
+      file = file.chomp
       unless File.exist?(file)
         return file.red
       end
@@ -27,6 +30,7 @@ class Util
 
     def vim_or_test(index, test, files)
       files[index] = files.first unless files.size > index
+      save_cache(files[index])
       command = "#{test ? "ruby -I test" : "vim"} #{files[index]}"
       puts command.green; system command
       print "\ndone. [press enter]: "
@@ -43,6 +47,40 @@ class Util
       regex =~ read(file)
     rescue => e
       false
+    end
+
+    def cache_file_path
+      "/usr/local/etc/vimfind/cache"
+    end
+  
+    def read_cache
+      FileUtils.touch(cache_file_path)
+      File.open(cache_file_path, "r").to_a.uniq.compact
+    end
+  
+    def cache_file_maximum
+      10
+    end
+
+    def clean_cache
+      FileUtils.rm(cache_file_path)
+    end
+
+    def save_cache(new_file)
+      cache_files = read_cache
+      unless cache_files.include?(new_file)
+        File.open(cache_file_path, "w") do |f|
+          cache_files[(cache_files.size - cache_file_maximum)...cache_files.size].each do |old_file|
+            f.puts old_file.chomp
+          end
+          f.puts new_file.chomp
+        end
+      end  
+    end
+
+    def vim(file)
+      save_cache(file)
+      system "vim #{file}"
     end
 
     #
@@ -63,7 +101,6 @@ class Util
       if nons.size > 0
         puts "\n0 result\n".red
         return
-        # files = files.select { |file| nons.select{|non| file.include?(non)}.size == 0  }
       end  
 
       files.each_with_index { |file, i|
@@ -76,12 +113,18 @@ class Util
       puts "[@: test all A: entire dir D: git diff range]"
       puts "[o: open index zero                         ]"
       puts "[,{@}: open the index with comma size       ]"
+      puts "[lc: load caches][cc: clean caches]"
       puts "[oo: open all]"
       puts "[tt: auto test all]"
       print "> "
 
       input = get_input
-      if input == "tt"
+      if input == "lc"
+        cache = read_cache
+        return open([], cache, cache, test)        
+      elsif input == "cc"
+        clean_cache
+      elsif input == "tt"
         files.select{ |file| !file.include?("_test") }.map {|file|
           file.gsub("app/", "test/").gsub(".rb", "_test.rb")
         }.select{ |file|
@@ -90,7 +133,7 @@ class Util
           system "ruby -I test #{test}"
         }
       elsif input == "oo"
-        system "vim #{files.select{|f| File.exist?(f)}.join(' ')}"
+        vim "#{files.select{|f| File.exist?(f)}.join(' ')}"
       elsif /^[,]+$/ =~ input
         vim_or_test(input.size-1, test, files)
       elsif /^\s*$/ =~ input
