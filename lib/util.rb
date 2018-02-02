@@ -77,12 +77,20 @@ class Util
       puts "[o: open index zero                         ]"
       puts "[,{@}: open the index with comma size       ]"
       puts "[oo: open all]"
+      puts "[tt: auto test all]"
       print "> "
 
       input = get_input
-
-      if input == "oo"
-        system "vim #{files.join(' ')}"
+      if input == "tt"
+        files.select{ |file| !file.include?("_test") }.map {|file|
+          file.gsub("app/", "test/").gsub(".rb", "_test.rb")
+        }.select{ |file|
+          File.exist?(file)
+        }.each { |test|
+          system "ruby -I test #{test}"
+        }
+      elsif input == "oo"
+        system "vim #{files.select{|f| File.exist?(f)}.join(' ')}"
       elsif /^[,]+$/ =~ input
         vim_or_test(input.size-1, test, files)
       elsif /^\s*$/ =~ input
