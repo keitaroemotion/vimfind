@@ -103,9 +103,17 @@ class Util
         return
       end  
 
-      files.each_with_index { |file, i|
-        puts "#{i} #{paint(keywords, file)}"
-      }
+      if files.size > 30
+        files[0..5].each_with_index { |file, i|
+          puts "#{i} #{paint(keywords, file)}"
+        }
+        puts "..."
+        puts "..."
+      else
+        files.each_with_index { |file, i|
+          puts "#{i} #{paint(keywords, file)}"
+        }
+      end
 
       puts "\n[test mode: #{test ? 'on'.green : 'off'.red}]"
       puts "[q: quit     t: test       c: cmd           ]"
