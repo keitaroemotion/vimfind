@@ -70,7 +70,7 @@ class Util
       cache_files = read_cache
       unless cache_files.include?(new_file)
         File.open(cache_file_path, "w") do |f|
-          cache_files[(cache_files.size - cache_file_maximum)...cache_files.size].each do |old_file|
+          cache_files.reverse[0...cache_files.size].each do |old_file|
             f.puts old_file.chomp
           end
           f.puts new_file.chomp
