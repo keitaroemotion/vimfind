@@ -3,7 +3,6 @@ class Util
   require "fileutils"
 
   class << self
-
     def paint(keywords, file)
       file = file.chomp
       unless File.exist?(file)

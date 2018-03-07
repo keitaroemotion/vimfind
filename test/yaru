@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 ./installer
-ruby test/lib/*_test.rb
+# ruby test/lib/vim_find_test.rb
+ruby test/lib/util_test.rb
