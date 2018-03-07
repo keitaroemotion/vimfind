@@ -83,6 +83,52 @@ class Util
       system "vim #{file}"
     end
 
+    def see_ancestor(files, editor_mode)
+      if files.size != 1
+        puts("\nfile size must be 1\n".red); return
+      end
+      file = files.first
+
+      commits = `git log #{file}`
+               .split("\n")
+               .select{ |x| /commit\s[a-z0-6]/ =~ x }
+               .map   { |x| x.gsub("commit", "")[0..10] }
+      check_ancestor(commits, 0, file, editor_mode)         
+    end
+
+    def check_ancestor(commits, index, file, editor_mode=false)
+      if commits.size <= index
+        puts "\nreached ceiling\n"
+        check_ancestor(commits, index - 1, file, editor_mode)
+      end
+      if index == -1
+        puts "\nreached bottom\n"
+        check_ancestor(commits, 0, file, editor_mode)
+      end
+
+      ancestor = `git show #{commits[index]}:#{file}`
+      if editor_mode
+        tmpfile = ".tmpvim"
+        File.open(tmpfile, "w"){ |f| f.puts("\nCommit: #{commits[index]}\n\n"); f.puts(ancestor) }
+        system "vim #{tmpfile}"
+      else
+        puts ancestor.blue
+        puts("\nCommit: #{commits[index]}\n\n".green)
+      end
+
+      print "[n/p/q]: "
+      input = $stdin.gets.chomp.downcase
+      case input
+      when "n"
+        index = index + 1
+      when "p"
+        index = index - 1
+      when "q"
+        abort
+      end
+      check_ancestor(commits, index, file, editor_mode)
+    end
+
     #
     # initially, files == original_files
     #
@@ -123,11 +169,15 @@ class Util
       puts "[,{@}: open the index with comma size       ]"
       puts "[lc: load caches][cc: clean caches]"
       puts "[oo: open all]   [ss: shorter first]"
-      puts "[tt: auto test all]"
+      puts "[tt: auto test all][--: ancestor][--e: ancestor editor mode]"
       print "> "
 
       input = get_input
-      if input == "ss"
+      if input == "--"
+        see_ancestor(files, false)
+      elsif input == "--e"
+        see_ancestor(files, true)
+      elsif input == "ss"
         files = files.sort_by(&:length)
       elsif input == "lc"
         cache = read_cache
