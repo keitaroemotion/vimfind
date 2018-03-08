@@ -3,14 +3,14 @@ class Util
   require "fileutils"
 
   class << self
-    def paint(keywords, file)
+    def paint(kws, file)
       file = file.chomp
-      unless File.exist?(file)
-        return file.red
-      end
-      keywords.each { |keyword|
-        file = file.gsub(keyword, keyword.green) if keyword.size > 1
-      }
+      return file.red unless File.exist?(file)
+      kws
+        .select { |kw| kw.size > 1 }
+        .each   { |kw|
+          file = file.gsub(kw, kw.green)
+        }
       file
     end
 
