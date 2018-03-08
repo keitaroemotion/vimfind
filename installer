@@ -1,4 +1,4 @@
-bundle install
+# bundle install
 sudo cp vf /usr/local/bin
 sudo cp vv /usr/local/bin
 sudo cp mvc /usr/local/bin
