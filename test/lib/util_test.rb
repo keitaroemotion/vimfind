@@ -20,5 +20,8 @@ class UtilTest < MiniTest::Test
     assert_equal expectation,                     @util.paint(%w[li uti], "./lib/util.rb")
     assert_equal "./lib/utilaa.rb".red,           @util.paint(%w[uti], "./lib/utilaa.rb")
   end
+
+  def test_sort_kws
+  end
 end
  

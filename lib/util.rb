@@ -3,135 +3,12 @@ class Util
   require "fileutils"
 
   class << self
-    def paint(kws, file)
-      file = file.chomp
-      return file.red unless File.exist?(file)
-      kws
-        .select { |kw| kw.size > 1 }
-        .each   { |kw|
-          file = file.gsub(kw, kw.green)
-        }
-      file
-    end
-
-    def sort_keywords(keywords)
-      [
-        keywords.select {|k| k.start_with?("^") }.map{|k| k.gsub("^", "")},      
-        keywords.select {|k| !k.start_with?("^") }
-      ]  
-    end
- 
-    def get_input
-      input = $stdin.gets.chomp
-      abort if input == "q"
-      input
-    end
-
-    def vim_or_test(index, test, files)
-      files[index] = files.first unless files.size > index
-      save_cache(files[index])
-      command = "#{test ? "ruby -I test" : "vim"} #{files[index]}"
-      puts command.green; system command
-      print "\ndone. [press enter]: "
-      !test || $stdin.gets.chomp
-    end
-
-    def read(file)
-      File.read(file)
-    rescue => e
-      ""
-    end
-
-    def match?(regex, file)
-      regex =~ read(file)
-    rescue => e
-      false
-    end
-
-    def cache_file_path
-      "/usr/local/etc/vimfind/cache"
-    end
-  
-    def read_cache
-      FileUtils.touch(cache_file_path)
-      File.open(cache_file_path, "r").to_a.uniq.compact
-    end
-  
-    def cache_file_maximum
-      10
-    end
-
-    def clean_cache
-      FileUtils.rm(cache_file_path)
-    end
-
-    def save_cache(new_file)
-      cache_files = read_cache
-      unless cache_files.include?(new_file)
-        File.open(cache_file_path, "w") do |f|
-          cache_files.reverse[0...cache_files.size].each do |old_file|
-            f.puts old_file.chomp
-          end
-          f.puts new_file.chomp
-        end
-      end  
-    end
-
-    def vim(file)
-      save_cache(file)
-      system "vim #{file}"
-    end
-
-    def see_ancestor(files, editor_mode)
-      if files.size != 1
-        puts("\nfile size must be 1\n".red); return
-      end
-      file = files.first
-
-      commits = `git log #{file}`
-               .split("\n")
-               .select{ |x| /commit\s[a-z0-6]/ =~ x }
-               .map   { |x| x.gsub("commit", "")[0..10] }
-      check_ancestor(commits, 0, file, editor_mode)         
-    end
-
-    def check_ancestor(commits, index, file, editor_mode=false)
-      if commits.size <= index
-        puts "\nreached ceiling\n"
-        check_ancestor(commits, index - 1, file, editor_mode)
-      end
-      if index == -1
-        puts "\nreached bottom\n"
-        check_ancestor(commits, 0, file, editor_mode)
-      end
-
-      ancestor = `git show #{commits[index]}:#{file}`
-      if editor_mode
-        tmpfile = ".tmpvim"
-        File.open(tmpfile, "w"){ |f| f.puts("\nCommit: #{commits[index]}\n\n"); f.puts(ancestor) }
-        system "vim #{tmpfile}"
-      else
-        puts ancestor.blue
-        puts("\nCommit: #{commits[index]}\n\n".green)
-      end
-
-      print "[n/p/q]: "
-      input = $stdin.gets.chomp.downcase
-      case input
-      when "n"
-        index = index + 1
-      when "p"
-        index = index - 1
-      when "q"
-        abort
-      end
-      check_ancestor(commits, index, file, editor_mode)
-    end
+    KHALED = "^"
 
     #
     # initially, files == original_files
     #
-    def open(keywords, files, original_files, test = false)
+    def open(keywords, files, original_files, test = false, debug = nil)
       nons, keywords = sort_keywords(keywords)
       print "keywords: #{keywords} ".cyan
       puts "nons: #{nons}".red
@@ -171,7 +48,7 @@ class Util
       puts "[tt: auto test all][--: ancestor][--e: ancestor editor mode]"
       print "> "
 
-      input = get_input
+      input = get_input(debug)
       if input == "--"
         see_ancestor(files, false)
       elsif input == "--e"
@@ -254,25 +131,6 @@ class Util
 
     def num?(i)
       !/^[0-9]/.match(i).nil?
-    end
-
-    def check_order(files, ofiles)
-      print "[enter number: ] ".magenta
-      i = $stdin.gets.chomp
-      files = files.select{|x| x.include?(i) }
-      files = ofiles if files.size == 0
-      files.each_with_index do |file, idx|
-        puts "[#{idx.to_s.yellow}]: #{file.gsub(i.to_s, i.to_s.green)}"
-      end
-      if num?(i) || files.size == 1
-        File.open("#{files[i.to_i]}", "r").each_line.to_a.select do |line|
-          line.strip.start_with?("def ") || line.strip.start_with?("test ")
-        end.each do |line|
-          puts line.strip.chomp.cyan
-        end
-      else
-        return check_order(files, ofiles)
-      end
     end
 
     def compare_methods(current_dir, method_name)
@@ -384,25 +242,6 @@ class Util
       end
     end  
 
-    def clean(files)
-      result = []
-      files.select{|f| File.exist?(f) }.each do |file|
-        count = 0
-        clean_text =
-          File.open(file, "r").map do |line|
-            line, count = cleansing_target_line(line, count)
-            "#{line}\n"
-          end.inject(:+)
-        File.open(file, "w") do |f|
-          f.puts clean_text
-        end
-        result.push [file, count]
-      end
-      result.each do |file, count|
-        puts "#{file}: #{count.to_s.green}" if count > 0
-      end
-    end
-
     def extra_option(opt)
       opt = opt.strip
       if opt == ":t"
@@ -475,6 +314,180 @@ class Util
       kws = kws.select {|kw| !kw.start_with?("!") }
       kws.select{|kw| x.include?(kw)}.size == kws.size && \
         negs.select{|kw| x.include?(kw)}.size == 0
+    end
+
+    private
+
+    def cache_file_path
+      "/usr/local/etc/vimfind/cache"
+    end
+ 
+    def cache_file_maximum
+      10
+    end
+
+    def check_ancestor(commits, index, file, editor_mode=false)
+      if commits.size <= index
+        puts "\nreached ceiling\n"
+        check_ancestor(commits, index - 1, file, editor_mode)
+      end
+      if index == -1
+        puts "\nreached bottom\n"
+        check_ancestor(commits, 0, file, editor_mode)
+      end
+
+      ancestor = `git show #{commits[index]}:#{file}`
+      if editor_mode
+        tmpfile = ".tmpvim"
+        File.open(tmpfile, "w"){ |f| f.puts("\nCommit: #{commits[index]}\n\n"); f.puts(ancestor) }
+        system "vim #{tmpfile}"
+      else
+        puts ancestor.blue
+        puts("\nCommit: #{commits[index]}\n\n".green)
+      end
+
+      print "[n/p/q]: "
+      input = $stdin.gets.chomp.downcase
+      case input
+      when "n"
+        index = index + 1
+      when "p"
+        index = index - 1
+      when "q"
+        abort
+      end
+      check_ancestor(commits, index, file, editor_mode)
+    end
+
+    def check_order(files, ofiles)
+      print "[enter number: ] ".magenta
+      i = $stdin.gets.chomp
+      files = files.select{|x| x.include?(i) }
+      files = ofiles if files.size == 0
+      files.each_with_index do |file, idx|
+        puts "[#{idx.to_s.yellow}]: #{file.gsub(i.to_s, i.to_s.green)}"
+      end
+      if num?(i) || files.size == 1
+        File.open("#{files[i.to_i]}", "r").each_line.to_a.select do |line|
+          line.strip.start_with?("def ") || line.strip.start_with?("test ")
+        end.each do |line|
+          puts line.strip.chomp.cyan
+        end
+      else
+        return check_order(files, ofiles)
+      end
+    end
+
+    def clean_cache
+      FileUtils.rm(cache_file_path)
+    end
+
+    def clean(files)
+      result = []
+      files.select{|f| File.exist?(f) }.each do |file|
+        count = 0
+        clean_text =
+          File.open(file, "r").map do |line|
+            line, count = cleansing_target_line(line, count)
+            "#{line}\n"
+          end.inject(:+)
+        File.open(file, "w") do |f|
+          f.puts clean_text
+        end
+        result.push [file, count]
+      end
+      result.each do |file, count|
+        puts "#{file}: #{count.to_s.green}" if count > 0
+      end
+    end
+
+    #
+    # FOR THE DEBUG, YOU NEED TO INPUT THE EXPECTED
+    # USER INPUT.
+    #
+    def get_input(debug)
+      if debug
+        input = debug
+      else
+        input = $stdin.gets.chomp
+        abort if input == "q"
+      end  
+      input
+    end
+
+    def match?(regex, file)
+      regex =~ read(file)
+    rescue => e
+      false
+    end
+
+    def paint(kws, file)
+      file = file.chomp
+      return file.red unless File.exist?(file)
+      kws
+        .select { |kw| kw.size > 1 }
+        .each   { |kw|
+          file = file.gsub(kw, kw.green)
+        }
+      file
+    end
+
+    def read(file)
+      File.read(file)
+    rescue => e
+      ""
+    end
+
+    def read_cache
+      FileUtils.touch(cache_file_path)
+      File.open(cache_file_path, "r").to_a.uniq.compact
+    end
+ 
+    def save_cache(new_file)
+      cache_files = read_cache
+      unless cache_files.include?(new_file)
+        File.open(cache_file_path, "w") do |f|
+          cache_files.reverse[0...cache_files.size].each do |old_file|
+            f.puts old_file.chomp
+          end
+          f.puts new_file.chomp
+        end
+      end  
+    end
+
+    def see_ancestor(files, editor_mode)
+      if files.size != 1
+        puts("\nfile size must be 1\n".red); return
+      end
+      file = files.first
+
+      commits = `git log #{file}`
+               .split("\n")
+               .select{ |x| /commit\s[a-z0-6]/ =~ x }
+               .map   { |x| x.gsub("commit", "")[0..10] }
+      check_ancestor(commits, 0, file, editor_mode)         
+    end
+
+
+    def sort_keywords(kws)
+      [
+        kws.select {|k| k.start_with?(KHALED) }.map{|k| k.gsub(KHALED, "")},      
+        kws.select {|k| !k.start_with?(KHALED) }
+      ]  
+    end
+
+    def vim(file)
+      save_cache(file)
+      system "vim #{file}"
+    end
+
+    def vim_or_test(index, test, files, debug = nil)
+      files[index] = files.first unless files.size > index
+      save_cache(files[index])
+      command = "#{test ? "ruby -I test" : "vim"} #{files[index]}"
+      puts command.green; system command
+      print "\ndone. [press enter]: "
+      !test || get_input(debug)
     end
   end
 end  
