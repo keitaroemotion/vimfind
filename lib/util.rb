@@ -5,6 +5,17 @@ class Util
   class << self
     KHALED = "^"
 
+    def reset_file(files, keywords)
+      if keywords.size > 0
+        regex = Regexp.new("#{keywords.join('.*')}.*")
+        puts "[regex: #{regex}] test: #{test} size: #{files.size} nons.size: #{nons.size}".yellow
+        files = files.select { |file| /_test\.rb/ =~ file } if test
+        files = files.select { |file| regex =~ file }
+        files = Dir["./**/*"].select { |file| regex =~ file } if files.size == 0
+      end  
+      files
+    end
+
     #
     # initially, files == original_files
     #
@@ -13,13 +24,8 @@ class Util
       print "keywords: #{keywords} ".cyan
       puts "nons: #{nons}".red
 
-      if keywords.size > 0
-        regex = Regexp.new("#{keywords.join('.*')}.*")
-        puts "[regex: #{regex}] test: #{test} size: #{files.size} nons.size: #{nons.size}".yellow
-        files = files.select { |file| /_test\.rb/ =~ file } if test
-        files = files.select { |file| regex =~ file }
-        files = Dir["./**/*"].select { |file| regex =~ file } if files.size == 0
-      end  
+      files = reset_file
+
       if nons.size > 0
         puts "\n0 result\n".red
         return
