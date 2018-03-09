@@ -5,17 +5,6 @@ class Util
   class << self
     KHALED = "^"
 
-    def reset_file(files, keywords)
-      if keywords.size > 0
-        regex = Regexp.new("#{keywords.join('.*')}.*")
-        puts "[regex: #{regex}] test: #{test} size: #{files.size} nons.size: #{nons.size}".yellow
-        files = files.select { |file| /_test\.rb/ =~ file } if test
-        files = files.select { |file| regex =~ file }
-        files = Dir["./**/*"].select { |file| regex =~ file } if files.size == 0
-      end  
-      files
-    end
-
     #
     # initially, files == original_files
     #
@@ -31,17 +20,7 @@ class Util
         return
       end  
 
-      if files.size > 30
-        files[0..5].each_with_index { |file, i|
-          puts "#{i} #{paint(keywords, file)}"
-        }
-        puts "..."
-        puts "..."
-      else
-        files.each_with_index { |file, i|
-          puts "#{i} #{paint(keywords, file)}"
-        }
-      end
+      display_files(files, keywords)
 
       puts "\n[test mode: #{test ? 'on'.green : 'off'.red}]"
       puts "[q: quit     t: test       c: cmd           ]"
@@ -407,6 +386,20 @@ class Util
       end
     end
 
+    def display_files(files, keywords)
+      if files.size > 30
+        files[0..5].each_with_index { |file, i|
+          puts "#{i} #{paint(keywords, file)}"
+        }
+        puts "..."
+        puts "..."
+      else
+        files.each_with_index { |file, i|
+          puts "#{i} #{paint(keywords, file)}"
+        }
+      end
+    end
+
     #
     # FOR THE DEBUG, YOU NEED TO INPUT THE EXPECTED
     # USER INPUT.
@@ -448,7 +441,19 @@ class Util
       FileUtils.touch(cache_file_path)
       File.open(cache_file_path, "r").to_a.uniq.compact
     end
- 
+
+    def reset_file(files, keywords)
+      if keywords.size > 0
+        regex = Regexp.new("#{keywords.join('.*')}.*")
+        puts "[regex: #{regex}] test: #{test} size: #{files.size} nons.size: #{nons.size}".yellow
+        files = files.select { |file| /_test\.rb/ =~ file } if test
+        files = files.select { |file| regex =~ file }
+        files = Dir["./**/*"].select { |file| regex =~ file } if files.size == 0
+      end  
+      files
+    end
+
+
     def save_cache(new_file)
       cache_files = read_cache
       unless cache_files.include?(new_file)
