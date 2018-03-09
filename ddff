@@ -97,8 +97,6 @@ when "refac"
   end
 when "sync"
   Sync.sync files
-when "-ld"
-  Util.compare_methods(".", ARGV[1])  
 when "-a"
   Util.grep files, $*[1]
   Util.open ARGV[1], files, files
@@ -123,7 +121,6 @@ when "r"
 when "help", "-h", "--help"
   puts ""
   puts "-a        ... look around (grep + find)"
-  puts "-ld [keyword] ... compare a function among classes"
   puts "refac [from] [to] ... refactor file contents"
   puts "refac [from] [to] -f  ... refactor file names"
   puts "sync      ... sync files"
