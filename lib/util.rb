@@ -37,19 +37,22 @@ class Util
       @input          = get_input(debug)
       input           = @input
 
+      is?(/^\d+$/)    && vim_or_test(input.to_i, test, files)
       is?("tt" )      && tt(files)
-      is?("--" )      && see_ancestor(files, false); 
+      is?("--" )      && see_ancestor(files, false)
       is?("--e")      && see_ancestor(files, true)
       is?("ss" )      && files = files.sort_by(&:length)
       is?("cc" )      && clean_cache
       is?("oo" )      && vim("#{files.select{|f| File.exist?(f)}.join(' ')}")
       is?(/^[,]+$/)   && vim_or_test(input.size-1, test, files)
-      is?("lc")       && cache = read_cache; return(open([], cache, cache, test))
       is?(/^\s*$/)    && keywords = []
       is?(/^o\s*$/)   && vim_or_test(0, test, files)
       is?(/^c\s*$/)   && system(input.gsub(/^c\s/, ""))
       is?(/^-\s*$/)   && system("git diff develop #{files.join(' ')}")
-      is?(/^\d+$/)    && vim_or_test(input.to_i, test, files)
+
+      if is?("lc")
+        cache = read_cache; return(open([], cache, cache, test))
+      end
 
       if is?(/^a\s*$/)
         return(open(input[1..-1].split(" "), original_files, original_files, test))
@@ -341,12 +344,13 @@ class Util
     end
 
     def is?(key)
+      return false if @fin_flag
       if key.class == Regexp
         match_result = key =~ @input
       else
         match_result = @input == key
       end  
-      if @input == key && !@fin_flag
+      if match_result
         @fin_flag = true
         return true
       end
