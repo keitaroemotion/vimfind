@@ -11,3 +11,5 @@ sudo cp lib/*.rb /usr/local/lib/vf
 sudo cp ddff /usr/local/bin
 sudo cp reb /usr/local/bin
 sudo cp synco /usr/local/bin
+mkdir /usr/local/etc/vimfind
+touch /usr/local/etc/vimfind/cache
