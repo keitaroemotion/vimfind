@@ -169,11 +169,23 @@ class Util
       puts "[,{@}: open the index with comma size       ]"
       puts "[lc: load caches][cc: clean caches]"
       puts "[oo: open all]   [ss: shorter first]"
+      puts "[:m: macdown]"
       puts "[tt: auto test all][--: ancestor][--e: ancestor editor mode]"
       print "> "
 
       input = get_input
-      if input == "--"
+      if input == ":m"
+        files.select{|f| f.end_with?(".md")}.each_with_index do |f, i|
+          puts "[#{i}] #{f}"
+        end        
+        print "> "
+        input = $stdin.gets.chomp.to_i
+        if files.size > input
+          system "macdown #{files[input]}"
+        else
+          puts "\nindex out of range\n"
+        end
+      elsif input == "--"
         see_ancestor(files, false)
       elsif input == "--e"
         see_ancestor(files, true)

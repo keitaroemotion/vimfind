@@ -13,3 +13,4 @@ sudo cp reb /usr/local/bin
 sudo cp synco /usr/local/bin
 mkdir /usr/local/etc/vimfind
 touch /usr/local/etc/vimfind/cache
+brew cask install macdown
